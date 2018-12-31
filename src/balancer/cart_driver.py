@@ -27,7 +27,7 @@ import abc
 
 
 class CartDriver(metaclass=abc.ABCMeta):
-    
+
     def __init__(self):
         pass
 
@@ -35,4 +35,3 @@ class CartDriver(metaclass=abc.ABCMeta):
     def steer(self, pitch):
         '''Calculate output for left and right wheel based on pitch'''
         raise NotImplementedError('You need to define this method in derived class!')
-    

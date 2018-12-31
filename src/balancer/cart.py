@@ -27,7 +27,7 @@
 import math
 import numpy as np
 import quaternion
- 
+
 import rospy
 from std_msgs.msg import Float64
 from sensor_msgs.msg import Imu
@@ -53,32 +53,32 @@ def rotationMatrixToEulerAngles(R) :
 
 
 class Cart:
-    
+
     def __init__(self):
         self.qorientation = None    ## quaternion
         self.euler_angles = None    ## in radians
         self.pitch = None           ## in degrees
-    
+
     def run(self, driver: CartDriver):
-        # [INFO] [1546208845.310780, 1800.357000]: /pic_controller_32685_1546208844652Imu received: 
-        # ['__class__', '__delattr__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setstate__', '__sizeof__', '__slots__', '__str__', '__subclasshook__', 
-        # '_check_types', '_connection_header', '_full_text', '_get_types', '_has_header', '_md5sum', '_slot_types', '_type', 
+        # [INFO] [1546208845.310780, 1800.357000]: /pic_controller_32685_1546208844652Imu received:
+        # ['__class__', '__delattr__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setstate__', '__sizeof__', '__slots__', '__str__', '__subclasshook__',
+        # '_check_types', '_connection_header', '_full_text', '_get_types', '_has_header', '_md5sum', '_slot_types', '_type',
         # 'angular_velocity', 'angular_velocity_covariance', 'deserialize', 'deserialize_numpy', 'header', 'linear_acceleration', 'linear_acceleration_covariance', 'orientation', 'orientation_covariance', 'serialize', 'serialize_numpy']
         rospy.Subscriber("/teeterbot/imu", Imu, self._imu_callback)
-        
+
         left_pub = rospy.Publisher('/teeterbot/left_torque_cmd', Float64, queue_size=10)
         right_pub = rospy.Publisher('/teeterbot/right_torque_cmd', Float64, queue_size=10)
-        
+
         r = rospy.Rate(10) # 10hz
         while not rospy.is_shutdown():
             ##str = "hello world %s"%rospy.get_time()
             #val = random.uniform(-1.0, 1.0)
-            
+
             output = driver.steer( self.pitch )
             left_out = output[0]
             right_out = output[1]
             rospy.loginfo("torque: %r %r", left_out, right_out)
-            
+
             left_pub.publish(left_out)
             right_pub.publish(right_out)
             r.sleep()
@@ -90,6 +90,6 @@ class Cart:
         pitchrad = self.euler_angles[1]
         self.pitch = math.degrees(pitchrad)
         ## rospy.loginfo(rospy.get_caller_id()+"Imu received: %r %r", imuangle, angledeg )
-        
+
 #         self.euler_angles = quaternion.as_euler_angles(self.qorientation)           ## yaw pitch roll
 #         rospy.loginfo(rospy.get_caller_id()+"Imu received: %r", self.euler_angles )

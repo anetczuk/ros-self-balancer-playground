@@ -45,7 +45,7 @@ def main():
         cart.run(driver)
 #     except rospy.ROSInterruptException as e:
     except Exception as e:
-        rospy.loginfo("exception", e ) 
+        rospy.loginfo("exception", e )
 
 
 if __name__ == '__main__':
