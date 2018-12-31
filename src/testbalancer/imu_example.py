@@ -30,7 +30,7 @@ from sensor_msgs.msg import Imu
 
 
 def callback(data):
-    rospy.loginfo(rospy.get_caller_id()+"I heard %s", str(data) )
+    rospy.loginfo(rospy.get_caller_id() + "I heard %s", str(data) )
 
 
 def listener():
@@ -46,6 +46,7 @@ def listener():
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
+
 
 if __name__ == '__main__':
     listener()

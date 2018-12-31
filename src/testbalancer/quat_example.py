@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import math
-import random
+# import random
 import numpy as np
 import quaternion
 
@@ -12,9 +12,11 @@ def v_angle(v1, v2):
     adeg = math.degrees( arad )
     print( v1, v2, "angle:", arad, adeg )
 
+
 def oz_angle( v1 ):
     oz = np.array( [0, 0, 1] )
     v_angle( v1, oz )
+
 
 def qoz_angle( q1 ):
     oz = np.array( [0, 0, 1] )
