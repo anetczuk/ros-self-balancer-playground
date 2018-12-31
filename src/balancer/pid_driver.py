@@ -24,6 +24,8 @@
 #
 
 
+from simple_pid.PID import PID
+
 from .cart_driver import CartDriver
 
 
@@ -31,6 +33,13 @@ class PIDDriver(CartDriver):
 
     def __init__(self):
         CartDriver.__init__(self)
+        self.pid = PID(0.8, 0.0, 0.0, sample_time=None)
 
     def steer(self, pitch):
-        return (0.01, 0.01)
+        if pitch is None:
+            return (0.0, 0.0)
+        if abs(pitch) > 50.0:
+            ## no chances to keep standing -- stop wheels
+            return (0.0, 0.0)
+        val = self.pid( pitch )
+        return (val, val)

@@ -43,9 +43,8 @@ def main():
         cart = Cart()
         driver = PIDDriver()
         cart.run(driver)
-#     except rospy.ROSInterruptException as e:
-    except Exception as e:
-        rospy.loginfo("exception", e )
+    except rospy.ROSInterruptException as e:
+        rospy.loginfo("exception: %r", e )
 
 
 if __name__ == '__main__':

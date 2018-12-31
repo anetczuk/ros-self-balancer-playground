@@ -72,7 +72,8 @@ class Cart:
         left_pub = rospy.Publisher('/teeterbot/left_torque_cmd', Float64, queue_size=10)
         right_pub = rospy.Publisher('/teeterbot/right_torque_cmd', Float64, queue_size=10)
 
-        r = rospy.Rate(10)                  # 10hz
+        r = rospy.Rate(30)                  # 10hz
+
         while not rospy.is_shutdown():
             ##str = "hello world %s"%rospy.get_time()
             #val = random.uniform(-1.0, 1.0)
@@ -80,11 +81,16 @@ class Cart:
             output = driver.steer( self.pitch )
             left_out = output[0]
             right_out = output[1]
-            rospy.loginfo("torque: %r %r", left_out, right_out)
+            rospy.loginfo("torque: %r -> %r %r", self.pitch, left_out, right_out)
 
             left_pub.publish(left_out)
             right_pub.publish(right_out)
-            r.sleep()
+
+            try:
+                r.sleep()
+            except rospy.exceptions.ROSTimeMovedBackwardsException as e:
+                ## happens when world is resetted
+                rospy.loginfo("exception: %r", e )
 
     def _imu_callback(self, imu_data):
         self.qorientation = np.quaternion( imu_data.orientation.x, imu_data.orientation.y, imu_data.orientation.z, imu_data.orientation.w )
