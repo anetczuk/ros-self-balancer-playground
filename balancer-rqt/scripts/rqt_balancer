@@ -4,8 +4,7 @@ import sys
 
 from rqt_gui.main import Main
 
-from rqt_balancer.my_module import MainWindow
-
+from rqt_balancer.main_window import MainWindow
 
 plugin = 'rqt_balancer'
 main = Main(filename=plugin)

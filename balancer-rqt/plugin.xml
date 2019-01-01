@@ -1,5 +1,5 @@
 <library path="src">
-  <class name="Balancer Control" type="rqt_balancer.my_module.MainWindow" base_class_type="rqt_gui_py::Plugin">
+  <class name="Balancer Control" type="rqt_balancer.main_window.MainWindow" base_class_type="rqt_gui_py::Plugin">
     <description>
       Control plugin for balancer.
     </description>
