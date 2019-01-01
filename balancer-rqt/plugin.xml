@@ -1,0 +1,20 @@
+<library path="src">
+  <class name="Balancer Control" type="rqt_balancer.my_module.MainWindow" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Control plugin for balancer.
+    </description>
+    <qtgui>
+      <group>
+        <label>Custom</label>
+      </group>
+      <!-- optional grouping...
+      <group>
+        <label>Subgroup</label>
+      </group>
+      -->
+      <label>Balancer Control</label>
+      <icon type="theme">system-help</icon>
+      <statustip>Control plugin for balancer.</statustip>
+    </qtgui>
+  </class>
+</library>

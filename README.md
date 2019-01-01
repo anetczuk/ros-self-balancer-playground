@@ -13,3 +13,20 @@ To run application try one of:
 To run tests execute *src/runtests.py*. It can be run with code profiling 
 and code coverage options.
 
+
+### rqt plugin
+
+Running:
+- ```rqt -vvv --standalone rqt_balancer```
+- ```rosrun rqt_balancer rqt_balancer```
+- ```rqt```
+
+Plugins list:
+```rqt --list-plugins```
+
+Packages list:
+```rospack list```
+
+Fix/detect:
+```rqt --force-discover```
+
