@@ -1,9 +1,12 @@
 import os
 import rospy
 import rospkg
+from std_msgs.msg import Float64
+
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget
+
 
 class MainWindow(Plugin):
 
@@ -12,35 +15,16 @@ class MainWindow(Plugin):
         # Give QObjects reasonable names
         self.setObjectName('MainWindow')
         
-        # Process standalone plugin command-line arguments
-        from argparse import ArgumentParser
-        parser = ArgumentParser()
-        # Add argument(s) to the parser.
-        parser.add_argument("-q", "--quiet", action="store_true",
-                      dest="quiet",
-                      help="Put plugin in silent mode")
-        args, unknowns = parser.parse_known_args(context.argv())
-        if not args.quiet:
-            print( 'arguments: ', args)
-            print( 'unknowns: ', unknowns)
-
-        # Create QWidget
-        self._widget = QWidget()
-        # Get path to UI file which should be in the "resource" folder of this package
-        ui_file = os.path.join(rospkg.RosPack().get_path('rqt_balancer'), 'resource', 'MainWindow.ui')
-        # Extend the widget with all attributes and children from UI file
-        loadUi(ui_file, self._widget)
-        # Give QObjects reasonable names
-        self._widget.setObjectName('MainWindowUi')
-        # Show _widget.windowTitle on left-top of each plugin (when 
-        # it's set in _widget). This is useful when you open multiple 
-        # plugins at once. Also if you open multiple instances of your 
-        # plugin at once, these lines add number to make it easy to 
-        # tell from pane to pane.
-        if context.serial_number() > 1:
-            self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
-        # Add widget to the user interface
-        context.add_widget(self._widget)
+        self._parse_cmd_args(context)
+        self._init_widget(context)
+        
+        self.kp_pub = rospy.Publisher('/self_balancer/pid/kp', Float64, queue_size=10, latch=True)
+        self.ki_pub = rospy.Publisher('/self_balancer/pid/ki', Float64, queue_size=10, latch=True)
+        self.kd_pub = rospy.Publisher('/self_balancer/pid/kd', Float64, queue_size=10, latch=True)
+        
+        self._widget.kpSB.valueChanged.connect( self._kpSB_changed )
+        self._widget.kiSB.valueChanged.connect( self._kiSB_changed )
+        self._widget.kdSB.valueChanged.connect( self._kdSB_changed )
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here
@@ -61,3 +45,47 @@ class MainWindow(Plugin):
         # This will enable a setting button (gear icon) in each dock widget title bar
         # Usually used to open a modal configuration dialog
         
+    def _parse_cmd_args(self, context):
+        # Process standalone plugin command-line arguments
+        from argparse import ArgumentParser
+        parser = ArgumentParser()
+        # Add argument(s) to the parser.
+        parser.add_argument("-q", "--quiet", action="store_true",
+                      dest="quiet",
+                      help="Put plugin in silent mode")
+        args, unknowns = parser.parse_known_args(context.argv())
+        if not args.quiet:
+            print( 'arguments: ', args)
+            print( 'unknowns: ', unknowns)
+    
+    def _init_widget(self, context):
+        # Create QWidget
+        self._widget = QWidget()
+        # Get path to UI file which should be in the "resource" folder of this package
+        ui_file = os.path.join(rospkg.RosPack().get_path('rqt_balancer'), 'resource', 'MainWindow.ui')
+        # Extend the widget with all attributes and children from UI file
+        loadUi(ui_file, self._widget)
+        # Give QObjects reasonable names
+        self._widget.setObjectName('MainWindowUi')
+        # Show _widget.windowTitle on left-top of each plugin (when 
+        # it's set in _widget). This is useful when you open multiple 
+        # plugins at once. Also if you open multiple instances of your 
+        # plugin at once, these lines add number to make it easy to 
+        # tell from pane to pane.
+        if context.serial_number() > 1:
+            self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+        # Add widget to the user interface
+        context.add_widget(self._widget)
+    
+    def _kpSB_changed(self, value):
+        print( 'kp changed: ', value)
+        self.kp_pub.publish(value)
+    
+    def _kiSB_changed(self, value):
+        print( 'ki changed: ', value)
+        self.ki_pub.publish(value)
+    
+    def _kdSB_changed(self, value):
+        print( 'kd changed: ', value)
+        self.kd_pub.publish(value)
+    
