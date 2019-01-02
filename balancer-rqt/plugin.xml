@@ -6,6 +6,8 @@
     <qtgui>
       <group>
         <label>Custom</label>
+        <icon type="theme">folder</icon>
+        <statustip>Custom plugins.</statustip>
       </group>
       <!-- optional grouping...
       <group>
@@ -13,7 +15,7 @@
       </group>
       -->
       <label>Balancer Control</label>
-      <icon type="theme">system-help</icon>
+      <icon type="theme">applications-other</icon>
       <statustip>Control plugin for balancer.</statustip>
     </qtgui>
   </class>
