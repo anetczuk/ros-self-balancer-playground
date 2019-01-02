@@ -30,6 +30,7 @@ import quaternion
 
 import rospy
 from std_msgs.msg import Float64
+from std_msgs.msg import Bool
 from sensor_msgs.msg import Imu
 
 from .cart_driver import CartDriver
@@ -57,17 +58,19 @@ def rotationMatrixToEulerAngles(R):
 
 class Cart:
 
-    def __init__(self):
+    def __init__(self, cart_driver: CartDriver):
         self.qorientation = None    ## quaternion
         self.euler_angles = None    ## in radians
         self.pitch = None           ## in degrees
+        self.driver = cart_driver
 
-    def run(self, driver: CartDriver):
+    def run(self):
         # [INFO] [1546208845.310780, 1800.357000]: /pic_controller_32685_1546208844652Imu received:
         # ['__class__', '__delattr__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setstate__', '__sizeof__', '__slots__', '__str__', '__subclasshook__',
         # '_check_types', '_connection_header', '_full_text', '_get_types', '_has_header', '_md5sum', '_slot_types', '_type',
         # 'angular_velocity', 'angular_velocity_covariance', 'deserialize', 'deserialize_numpy', 'header', 'linear_acceleration', 'linear_acceleration_covariance', 'orientation', 'orientation_covariance', 'serialize', 'serialize_numpy']
         rospy.Subscriber("/teeterbot/imu", Imu, self._imu_callback)
+        rospy.Subscriber("/teeterbot/fallen_over", Bool, self._cart_fallen)
 
         left_pub = rospy.Publisher('/teeterbot/left_torque_cmd', Float64, queue_size=10)
         right_pub = rospy.Publisher('/teeterbot/right_torque_cmd', Float64, queue_size=10)
@@ -78,20 +81,33 @@ class Cart:
             ##str = "hello world %s"%rospy.get_time()
             #val = random.uniform(-1.0, 1.0)
 
-            output = driver.steer( self.pitch )
-            left_out = output[0]
-            right_out = output[1]
-            rospy.loginfo("torque: %r -> %r %r", self.pitch, left_out, right_out)
-
-            left_pub.publish(left_out)
-            right_pub.publish(right_out)
-
+            output = self.driver.steer( self.pitch )
+            if output is not None:
+                left_out = output[0]
+                right_out = output[1]
+                rospy.loginfo("torque: %r -> %r %r", self.pitch, left_out, right_out)
+                left_pub.publish(left_out)
+                right_pub.publish(right_out)
+            else:
+                left_pub.publish(0.0)
+                right_pub.publish(0.0)
+                
             try:
                 r.sleep()
             except rospy.exceptions.ROSTimeMovedBackwardsException as e:
                 ## happens when world is resetted
                 rospy.loginfo("exception: %r", e )
+                self._reset_driver()
 
+    def _cart_fallen(self, value):
+        if value.data is False:
+            ## cart stand up
+            self._reset_driver()
+        
+    def _reset_driver(self):
+        rospy.loginfo("resetting driver's state" )
+        self.driver.reset_state()
+        
     def _imu_callback(self, imu_data):
         self.qorientation = np.quaternion( imu_data.orientation.x, imu_data.orientation.y, imu_data.orientation.z, imu_data.orientation.w )
         quat_vecs = quaternion.as_rotation_matrix( self.qorientation )

@@ -32,6 +32,14 @@ class CartDriver(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def reset_state(self):
+        """Reset driver state.
+        
+           It's called when cart stands up after fall.
+        """
+        raise NotImplementedError('You need to define this method in derived class!')
+    
+    @abc.abstractmethod
     def steer(self, pitch):
         """Calculate output for left and right wheel based on pitch."""
         raise NotImplementedError('You need to define this method in derived class!')

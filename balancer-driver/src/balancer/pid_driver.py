@@ -25,6 +25,8 @@
 
 
 from simple_pid.PID import PID
+import rospy
+from std_msgs.msg import Float64
 
 from .cart_driver import CartDriver
 
@@ -33,13 +35,38 @@ class PIDDriver(CartDriver):
 
     def __init__(self):
         CartDriver.__init__(self)
-        self.pid = PID(0.8, 0.0, 0.0, sample_time=None)
+        self.pid = None
+        
+        self.reset_state()
 
+        rospy.Subscriber("/self_balancer/pid/kp", Float64, self._kp_callback)
+        rospy.Subscriber("/self_balancer/pid/ki", Float64, self._ki_callback)
+        rospy.Subscriber("/self_balancer/pid/kd", Float64, self._kd_callback)
+
+    def reset_state(self):
+        newPid = PID(0.0, 0.0, 0.0, sample_time=None)
+        if self.pid is not None:
+            params = self.pid.tunings
+            newPid.tunings = params
+        self.pid = newPid
+        
     def steer(self, pitch):
         if pitch is None:
             return (0.0, 0.0)
         if abs(pitch) > 50.0:
             ## no chances to keep standing -- stop wheels
-            return (0.0, 0.0)
+            return None
         val = self.pid( pitch )
         return (val, val)
+
+    def _kp_callback(self, value):
+        rospy.loginfo("setting Kp: %r", value )
+        self.pid.Kp = value.data
+
+    def _ki_callback(self, value):
+        rospy.loginfo("setting Ki: %r", value )
+        self.pid.Ki = value.data
+
+    def _kd_callback(self, value):
+        rospy.loginfo("setting Kd: %r", value )
+        self.pid.Kd = value.data

@@ -40,9 +40,9 @@ from balancer.pid_driver import PIDDriver
 def main():
     try:
         rospy.init_node('balancer', anonymous=True)
-        cart = Cart()
         driver = PIDDriver()
-        cart.run(driver)
+        cart = Cart(driver)
+        cart.run()
     except rospy.ROSInterruptException as e:
         rospy.loginfo("exception: %r", e )
 
