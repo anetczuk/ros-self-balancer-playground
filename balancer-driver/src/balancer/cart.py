@@ -32,6 +32,7 @@ import rospy
 from std_msgs.msg import Float64
 from std_msgs.msg import Bool
 from sensor_msgs.msg import Imu
+from std_srvs.srv import Empty
 
 from .cart_driver import CartDriver
 
@@ -63,6 +64,8 @@ class Cart:
         self.euler_angles = None    ## in radians
         self.pitch = None           ## in degrees
         self.driver = cart_driver
+        
+        self.reset_simulation = rospy.ServiceProxy('/gazebo/reset_simulation', Empty)
 
     def run(self):
         # [INFO] [1546208845.310780, 1800.357000]: /pic_controller_32685_1546208844652Imu received:
@@ -72,8 +75,13 @@ class Cart:
         rospy.Subscriber("/teeterbot/imu", Imu, self._imu_callback)
         rospy.Subscriber("/teeterbot/fallen_over", Bool, self._cart_fallen)
 
-        left_pub = rospy.Publisher('/teeterbot/left_torque_cmd', Float64, queue_size=10)
-        right_pub = rospy.Publisher('/teeterbot/right_torque_cmd', Float64, queue_size=10)
+        pitch_pub = rospy.Publisher('/self_balancer/pitch', Float64, queue_size=10)
+        output_pub = rospy.Publisher('/self_balancer/output', Float64, queue_size=10)
+        
+#         left_pub = rospy.Publisher('/teeterbot/left_torque_cmd', Float64, queue_size=10)
+#         right_pub = rospy.Publisher('/teeterbot/right_torque_cmd', Float64, queue_size=10)
+        left_pub = rospy.Publisher('/teeterbot/left_motor_voltage', Float64, queue_size=10)
+        right_pub = rospy.Publisher('/teeterbot/right_motor_voltage', Float64, queue_size=10)
 
         r = rospy.Rate(30)                  # 10hz
 
@@ -81,16 +89,20 @@ class Cart:
             ##str = "hello world %s"%rospy.get_time()
             #val = random.uniform(-1.0, 1.0)
 
+            pitch_pub.publish( self.pitch )
+
             output = self.driver.steer( self.pitch )
             if output is not None:
                 left_out = output[0]
                 right_out = output[1]
-                rospy.loginfo("torque: %r -> %r %r", self.pitch, left_out, right_out)
+                rospy.loginfo("output: %r -> %r %r", self.pitch, left_out, right_out)
                 left_pub.publish(left_out)
                 right_pub.publish(right_out)
+                output_pub.publish(right_out)
             else:
                 left_pub.publish(0.0)
                 right_pub.publish(0.0)
+                output_pub.publish(0.0)
                 
             try:
                 r.sleep()
@@ -102,7 +114,8 @@ class Cart:
     def _cart_fallen(self, value):
         if value.data is False:
             ## cart stand up
-            self._reset_driver()
+            rospy.loginfo("cart stand up - resetting simulation" )
+            self.reset_simulation()
         
     def _reset_driver(self):
         rospy.loginfo("resetting driver's state" )
@@ -115,6 +128,6 @@ class Cart:
         pitchrad = self.euler_angles[1]
         self.pitch = math.degrees(pitchrad)
         ## rospy.loginfo(rospy.get_caller_id()+"Imu received: %r %r", imuangle, angledeg )
-
+        
 #         self.euler_angles = quaternion.as_euler_angles(self.qorientation)           ## yaw pitch roll
 #         rospy.loginfo(rospy.get_caller_id()+"Imu received: %r", self.euler_angles )
