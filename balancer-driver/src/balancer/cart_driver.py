@@ -40,6 +40,6 @@ class CartDriver(metaclass=abc.ABCMeta):
         raise NotImplementedError('You need to define this method in derived class!')
     
     @abc.abstractmethod
-    def steer(self, pitch):
+    def steer(self, cart):
         """Calculate output for left and right wheel based on pitch."""
         raise NotImplementedError('You need to define this method in derived class!')
