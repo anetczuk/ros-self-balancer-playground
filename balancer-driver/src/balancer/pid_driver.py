@@ -177,6 +177,6 @@ class PIDDriver(CartDriver):
         self.pitchpid.set_target(speedValue)
         pitchValue = self.pitchpid.steer( pitchInput )
         
-        rospy.loginfo("pid: %r %r -> %r -> %r", pitchInput, speedInput, speedValue, pitchValue)
+        rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f", pitchInput, speedInput, speedValue, pitchValue)
         return (pitchValue, pitchValue)
     

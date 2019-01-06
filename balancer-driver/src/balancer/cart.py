@@ -97,7 +97,7 @@ class Cart:
             if output is not None:
                 left_out = output[0]
                 right_out = output[1]
-                rospy.loginfo("output: %r -> %r %r", self.pitch, left_out, right_out)
+                rospy.loginfo("output: %+.8f -> %+.8f %+.8f", self.pitch, left_out, right_out)
                 left_pub.publish(left_out)
                 right_pub.publish(right_out)
                 output_pub.publish(right_out)
