@@ -18,31 +18,19 @@ class MainWindow(Plugin):
         self.setObjectName('MainWindow')
         
         self._parse_cmd_args(context)
-        self._init_widget(context)
-        
-#         self.angle_pub = rospy.Publisher('/self_balancer/angle_pid/setpoint', Float64, queue_size=10, latch=True)
-#         self.kp_pub = rospy.Publisher('/self_balancer/angle_pid/kp', Float64, queue_size=10, latch=True)
-#         self.ki_pub = rospy.Publisher('/self_balancer/angle_pid/ki', Float64, queue_size=10, latch=True)
-#         self.kd_pub = rospy.Publisher('/self_balancer/angle_pid/kd', Float64, queue_size=10, latch=True)
-#         
-#         self._widget.angleSB.valueChanged.connect( self._angleSB_changed )
-#         self._widget.kpSB.valueChanged.connect( self._kpSB_changed )
-#         self._widget.kiSB.valueChanged.connect( self._kiSB_changed )
-#         self._widget.kdSB.valueChanged.connect( self._kdSB_changed )
+        self._init_widget(context)       
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here
         pass
 
     def save_settings(self, plugin_settings, instance_settings):
-        # TODO save intrinsic configuration, usually using:
-        # instance_settings.set_value(k, v)
-        pass
+        self.pitchWidget.save_settings(plugin_settings)
+        self.speedWidget.save_settings(plugin_settings) 
 
     def restore_settings(self, plugin_settings, instance_settings):
-        # TODO restore intrinsic configuration, usually using:
-        # v = instance_settings.value(k)
-        pass
+        self.pitchWidget.restore_settings(plugin_settings)
+        self.speedWidget.restore_settings(plugin_settings)
 
     #def trigger_configuration(self):
         # Comment in to signal that the plugin has a way to configure
@@ -77,8 +65,8 @@ class MainWindow(Plugin):
         if context.serial_number() > 1:
             self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
         
-        pitchWidget = PidWidget( self._widget.pitchPid, "pitch_pid" )
-        speedWidget = PidWidget( self._widget.speedPid, "speed_pid" )
+        self.pitchWidget = PidWidget( self._widget.pitchPid, "pitch_pid" )
+        self.speedWidget = PidWidget( self._widget.speedPid, "speed_pid" )
 #         sumWidget = PidWidget( self._widget.pitchPid, "sum_pid" )
         
         # Add widget to the user interface

@@ -48,3 +48,21 @@ class PidWidget(QWidget):
         print( self.pid_name, ' kd changed: ', value)
         self.kd_pub.publish(value)
     
+    def save_settings(self, plugin_settings):
+        settings = plugin_settings.get_settings(self.pid_name)
+        settings.set_value("setpoint", self.setpointSB.value() )
+        settings.set_value("kp", self.kpSB.value() )
+        settings.set_value("ki", self.kiSB.value() )
+        settings.set_value("kd", self.kdSB.value() )
+
+    def restore_settings(self, plugin_settings):
+        settings = plugin_settings.get_settings(self.pid_name)
+        setpoint = settings.value("setpoint", 0)
+        self.setpointSB.setValue( float(setpoint) )
+        kp = settings.value("kp", 0)
+        self.kpSB.setValue( float(kp) )
+        ki = settings.value("ki", 0)
+        self.kiSB.setValue( float(ki) )
+        kd = settings.value("kd", 0)
+        self.kdSB.setValue( float(kd) )
+    
