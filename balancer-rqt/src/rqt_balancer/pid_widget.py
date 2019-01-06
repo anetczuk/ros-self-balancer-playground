@@ -19,6 +19,7 @@ class PidWidget(QWidget):
         loadUi(ui_file, self)
         # Give QObjects reasonable names
         
+        self.pid_name = pidName
         self.widgetName.setText( pidName )
         
         self.setpoint_pub = rospy.Publisher('/self_balancer/' + pidName + '/setpoint', Float64, queue_size=10, latch=True)
@@ -32,18 +33,18 @@ class PidWidget(QWidget):
         self.kdSB.valueChanged.connect( self._kdSB_changed )
     
     def _setpointSB_changed(self, value):
-        print( 'setpoint changed: ', value)
+        print( self.pid_name, ' setpoint changed: ', value)
         self.setpoint_pub.publish(value)
          
     def _kpSB_changed(self, value):
-        print( 'kp changed: ', value)
+        print( self.pid_name, ' kp changed: ', value)
         self.kp_pub.publish(value)
      
     def _kiSB_changed(self, value):
-        print( 'ki changed: ', value)
+        print( self.pid_name, ' ki changed: ', value)
         self.ki_pub.publish(value)
      
     def _kdSB_changed(self, value):
-        print( 'kd changed: ', value)
+        print( self.pid_name, ' kd changed: ', value)
         self.kd_pub.publish(value)
     

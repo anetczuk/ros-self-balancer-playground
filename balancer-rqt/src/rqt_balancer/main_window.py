@@ -77,8 +77,9 @@ class MainWindow(Plugin):
         if context.serial_number() > 1:
             self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
         
-        self._widget.pitchPid = PidWidget( self._widget, "pitch_pid" )
-        #self._widget.speedPid = PidWidget( self._widget, "speed_pid" )
+        pitchWidget = PidWidget( self._widget.pitchPid, "pitch_pid" )
+        speedWidget = PidWidget( self._widget.speedPid, "speed_pid" )
+#         sumWidget = PidWidget( self._widget.pitchPid, "sum_pid" )
         
         # Add widget to the user interface
         context.add_widget(self._widget)
