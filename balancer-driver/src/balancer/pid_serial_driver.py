@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-#
 # MIT License
 #
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
@@ -24,26 +22,36 @@
 #
 
 
-import sys
-import os
-
-#### append local library
-script_dir = os.path.dirname(__file__)
-sys.path.append(os.path.abspath( os.path.join(script_dir, "..") ))
-
 import rospy
-
-from balancer.cart import Cart
-
-
-def main():
-    try:
-        rospy.init_node('balancer', anonymous=True)
-        cart = Cart()
-        cart.run()
-    except rospy.ROSInterruptException as e:
-        rospy.loginfo("exception: %r", e )
+    
+from .cart_driver import CartDriver
+from .pid_object import PIDObject
 
 
-if __name__ == '__main__':
-    main()
+class PIDSerialDriver(CartDriver):
+
+    def __init__(self):
+        CartDriver.__init__(self)
+        self.pitchpid = PIDObject("pitch_pid", 10.0)
+        self.pitchpid.set_params( 0.5, 0.3, 0.3 )
+        self.speedpid = PIDObject("speed_pid", 30.0)
+        self.speedpid.set_params( 0.3, 0.0, 0.12 )
+
+    def reset_state(self):
+        rospy.loginfo("resetting PID" )
+        self.pitchpid.reset_state()
+        self.speedpid.reset_state()
+        
+    def steer(self, cart):       
+        pitch = cart.pitch
+        speedInput = cart.wheel_speed
+        if speedInput is None:
+            return (0.0, 0.0)
+
+        speedValue = self.speedpid.steer( speedInput )
+        pitchInput = pitch + speedValue
+        pitchValue = self.pitchpid.steer( pitchInput )
+        
+        rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f", pitch, speedInput, speedValue, pitchValue)
+        return (pitchValue, pitchValue)
+    

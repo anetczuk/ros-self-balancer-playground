@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#
 # MIT License
 #
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
@@ -34,7 +32,8 @@ from std_msgs.msg import Bool
 from sensor_msgs.msg import Imu
 from std_srvs.srv import Empty
 
-from .cart_driver import CartDriver
+# from .pid_cascade_driver import PIDCascadeDriver as Driver
+from .pid_serial_driver import PIDSerialDriver as Driver
 
 
 def rotationMatrixToEulerAngles(R):
@@ -59,12 +58,12 @@ def rotationMatrixToEulerAngles(R):
 
 class Cart:
 
-    def __init__(self, cart_driver: CartDriver):
+    def __init__(self):
         self.qorientation = None    ## quaternion
         self.euler_angles = None    ## in radians
         self.pitch = None           ## in degrees
         self.wheel_speed = None
-        self.driver = cart_driver
+        self.driver = Driver()
         
         self.reset_simulation = rospy.ServiceProxy('/gazebo/reset_world', Empty)
 
@@ -116,10 +115,10 @@ class Cart:
     def drive(self):
         if self.pitch is None:
 #             rospy.loginfo("pid state: %r (%s)", pitchInput, self.pitchpid.state() )
-            return (0.0, 0.0)
+            return None
         if abs(self.pitch) > 70.0:
             ## no chances to keep standing -- stop wheels
-            return None
+            return (0.0, 0.0)
         output = self.driver.steer( self )
         if output is None:
             return (0.0, 0.0)

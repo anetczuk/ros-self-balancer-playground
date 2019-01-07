@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#
 # MIT License
 #
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
@@ -22,13 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-
+    
 
 from simple_pid.PID import PID
 import rospy
 from std_msgs.msg import Float64
-
-from .cart_driver import CartDriver
 
 
 class PIDObject():
@@ -102,63 +98,3 @@ class PIDObject():
     def _kd_callback(self, value):
         rospy.loginfo("%s setting Kd: %r", self.pid_name, value )
         self.pid.Kd = value.data
-    
-
-class PIDDriver(CartDriver):
-
-    def __init__(self):
-        CartDriver.__init__(self)
-        self.pitchpid = PIDObject("pitch_pid", 10.0)
-        self.pitchpid.set_params( 0.5, 0.6, 2.0 )
-        self.speedpid = PIDObject("speed_pid", 30.0)
-        self.speedpid.set_params( -0.5, -0.3, 2.0 )
-
-    def reset_state(self):
-        rospy.loginfo("resetting PID" )
-        self.pitchpid.reset_state()
-        self.speedpid.reset_state()
-        
-    def steer(self, cart):       
-        return self.pidCascade(cart)
-#         return self.pidAvg(cart)
-#         return self.pidSum(cart)
-    
-    def pidSum(self, cart):
-        pitchInput = cart.pitch
-        speedInput = cart.wheel_speed
-        if speedInput is None:
-            return (0.0, 0.0)
-
-        pitchValue = self.pitchpid.steer( pitchInput )
-        speedValue = self.speedpid.steer( speedInput )
-        outValue = pitchValue + speedValue                    
-             
-        rospy.loginfo("pid: %+.8f %+.8f %+.8f", pitchValue, speedValue, outValue)
-        return (outValue, outValue)
-    
-    def pidAvg(self, cart):
-        pitchInput = cart.pitch
-        speedInput = cart.wheel_speed
-        if speedInput is None:
-            return (0.0, 0.0)
-        
-        pitchValue = self.pitchpid.steer( pitchInput )
-        speedValue = self.speedpid.steer( speedInput )
-        outValue = (pitchValue + speedValue) / 2                    
-             
-        rospy.loginfo("pid: %+.8f %+.8f %+.8f", pitchValue, speedValue, outValue)
-        return (outValue, outValue)
-    
-    def pidCascade(self, cart):
-        pitchInput = cart.pitch
-        speedInput = cart.wheel_speed
-        if speedInput is None:
-            return (0.0, 0.0)
-
-        speedValue = self.speedpid.steer( speedInput )
-        self.pitchpid.set_target(speedValue)
-        pitchValue = self.pitchpid.steer( pitchInput )
-        
-        rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f", pitchInput, speedInput, speedValue, pitchValue)
-        return (pitchValue, pitchValue)
-    
