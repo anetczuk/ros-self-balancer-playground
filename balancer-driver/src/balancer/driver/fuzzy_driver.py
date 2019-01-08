@@ -23,6 +23,8 @@
 
 
 import rospy
+
+import numpy as np
 import skfuzzy as fuzz
     
 from ..cart_driver import CartDriver

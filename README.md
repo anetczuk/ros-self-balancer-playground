@@ -35,4 +35,5 @@ Fix/detect:
 
 - http://wiki.ros.org/rqt/Tutorials/Create%20your%20new%20rqt%20plugin
 - http://wiki.ros.org/rqt/Tutorials/Writing%20a%20Python%20Plugin
+- https://pythonhosted.org/scikit-fuzzy/index.html
 
