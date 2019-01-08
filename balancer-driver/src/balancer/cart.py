@@ -29,11 +29,13 @@ import quaternion
 import rospy
 from std_msgs.msg import Float64
 from std_msgs.msg import Bool
+from std_msgs.msg import String
 from sensor_msgs.msg import Imu
 from std_srvs.srv import Empty
 
-# from .pid_cascade_driver import PIDCascadeDriver as Driver
-from .pid_serial_driver import PIDSerialDriver as Driver
+from .driver.pid_single_driver import PIDSingleDriver
+from .driver.pid_cascade_driver import PIDCascadeDriver
+from .driver.pid_serial_driver import PIDSerialDriver
 
 
 def rotationMatrixToEulerAngles(R):
@@ -63,7 +65,9 @@ class Cart:
         self.euler_angles = None    ## in radians
         self.pitch = None           ## in degrees
         self.wheel_speed = None
-        self.driver = Driver()
+        self.driver = None
+        
+        self._create_driver("PID_SINGLE")
         
         self.reset_simulation = rospy.ServiceProxy('/gazebo/reset_world', Empty)
 
@@ -76,6 +80,7 @@ class Cart:
         rospy.Subscriber("/teeterbot/imu", Imu, self._imu_callback)
         rospy.Subscriber("/teeterbot/right_wheel_speed", Float64, self._wheel_callback)
 
+        rospy.Subscriber("/self_balancer/driver_type", String, self._driver_type_callback)
         pitch_pub = rospy.Publisher('/self_balancer/pitch', Float64, queue_size=10)
         output_pub = rospy.Publisher('/self_balancer/output', Float64, queue_size=10)
         
@@ -124,6 +129,27 @@ class Cart:
             return (0.0, 0.0)
         return output
 
+    def _driver_type_callback(self, driver_type):
+        driver_data = driver_type.data
+        self._create_driver( driver_data )
+        
+    def _create_driver(self, driver_type):
+        rospy.loginfo("got driver: %s", driver_type)
+        if driver_type == "PID_SINGLE":
+            rospy.loginfo("setting single PID driver" )
+            self.driver = PIDSingleDriver()
+            return
+        if driver_type == "PID_CASCADE":
+            rospy.loginfo("setting cascade PID driver" )
+            self.driver = PIDCascadeDriver()
+            return
+        if driver_type == "PID_SERIAL":
+            rospy.loginfo("setting serial PID driver" )
+            self.driver = PIDSerialDriver()
+            return
+        rospy.loginfo("unknown driver type: %s", driver_type)
+        
+        
     def _cart_fallen(self, value):
         if value.data is False:
             ## cart stand up

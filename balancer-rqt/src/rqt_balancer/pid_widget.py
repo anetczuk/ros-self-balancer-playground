@@ -14,7 +14,7 @@ class PidWidget(QWidget):
         super(PidWidget, self).__init__(parent)
         # Create QWidget
         # Get path to UI file which should be in the "resource" folder of this package
-        ui_file = os.path.join(rospkg.RosPack().get_path('rqt_balancer'), 'resource', 'PidWidget.ui')
+        ui_file = os.path.join(rospkg.RosPack().get_path('rqt_balancer'), 'resource',  self.__class__.__name__ + '.ui')
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self)
         # Give QObjects reasonable names

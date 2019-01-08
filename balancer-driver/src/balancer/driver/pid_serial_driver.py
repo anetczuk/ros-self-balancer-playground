@@ -24,7 +24,7 @@
 
 import rospy
     
-from .cart_driver import CartDriver
+from ..cart_driver import CartDriver
 from .pid_object import PIDObject
 
 
@@ -32,9 +32,9 @@ class PIDSerialDriver(CartDriver):
 
     def __init__(self):
         CartDriver.__init__(self)
-        self.pitchpid = PIDObject("pitch_pid", 10.0)
+        self.pitchpid = PIDObject("serial_pid/pitch", 10.0)
         self.pitchpid.set_params( 0.5, 0.3, 0.3 )
-        self.speedpid = PIDObject("speed_pid", 30.0)
+        self.speedpid = PIDObject("serial_pid/speed", 30.0)
         self.speedpid.set_params( 0.3, 0.0, 0.12 )
 
     def reset_state(self):

@@ -24,34 +24,25 @@
 
 import rospy
     
-from .cart_driver import CartDriver
+from ..cart_driver import CartDriver
 from .pid_object import PIDObject
 
 
-class PIDCascadeDriver(CartDriver):
+class PIDSingleDriver(CartDriver):
 
     def __init__(self):
         CartDriver.__init__(self)
-        self.pitchpid = PIDObject("pitch_pid", 10.0)
-        self.pitchpid.set_params( 0.5, 0.6, 2.0 )
-        self.speedpid = PIDObject("speed_pid", 30.0)
-        self.speedpid.set_params( -0.5, -0.3, 2.0 )
+        self.pitchpid = PIDObject("single_pid/pitch", 10.0)
+        self.pitchpid.set_params( 1.0, 0.6, 0.3 )
 
     def reset_state(self):
         rospy.loginfo("resetting PID" )
         self.pitchpid.reset_state()
-        self.speedpid.reset_state()
         
-    def steer(self, cart):       
-        pitchInput = cart.pitch
-        speedInput = cart.wheel_speed
-        if speedInput is None:
-            return (0.0, 0.0)
-
-        speedValue = self.speedpid.steer( speedInput )
-        self.pitchpid.set_target(speedValue)
-        pitchValue = self.pitchpid.steer( pitchInput )
+    def steer(self, cart):
+        pitch = cart.pitch
+        pitchValue = self.pitchpid.steer( pitch )
         
-        rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f", pitchInput, speedInput, speedValue, pitchValue)
+        rospy.loginfo("pid: %+.8f -> %+.8f", pitch, pitchValue)
         return (pitchValue, pitchValue)
     

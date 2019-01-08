@@ -13,12 +13,19 @@
   <property name="windowTitle">
    <string>Balancer</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="1">
-    <widget class="QWidget" name="pitchPid" native="true"/>
-   </item>
+  <layout class="QGridLayout" name="gridLayout" columnstretch="0,1">
    <item row="0" column="0">
-    <widget class="QWidget" name="speedPid" native="true"/>
+    <widget class="QLabel" name="driverText">
+     <property name="text">
+      <string>Driver:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QComboBox" name="driverCB"/>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QStackedWidget" name="driverWidget"/>
    </item>
   </layout>
  </widget>

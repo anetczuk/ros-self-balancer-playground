@@ -1,13 +1,15 @@
 import os
 import rospy
 import rospkg
-from std_msgs.msg import Float64
+from std_msgs.msg import String
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget
 
-from .pid_widget import PidWidget
+from .pid_single_widget import PidSingleWidget
+from .pid_cascade_widget import PidCascadeWidget
+from .pid_serial_widget import PidSerialWidget
 
 
 class MainWindow(Plugin):
@@ -17,6 +19,8 @@ class MainWindow(Plugin):
         # Give QObjects reasonable names
         self.setObjectName('MainWindow')
         
+        self.driver_type_pub = rospy.Publisher('/self_balancer/driver_type', String, queue_size=10, latch=True)
+        
         self._parse_cmd_args(context)
         self._init_widget(context)       
 
@@ -25,12 +29,16 @@ class MainWindow(Plugin):
         pass
 
     def save_settings(self, plugin_settings, instance_settings):
-        self.pitchWidget.save_settings(plugin_settings)
-        self.speedWidget.save_settings(plugin_settings) 
+        widgetsCount = self._mainWindowUi.driverWidget.count()
+        for i in range(0, widgetsCount):
+            driver = self._mainWindowUi.driverWidget.widget(i)
+            driver.save_settings(plugin_settings)
 
     def restore_settings(self, plugin_settings, instance_settings):
-        self.pitchWidget.restore_settings(plugin_settings)
-        self.speedWidget.restore_settings(plugin_settings)
+        widgetsCount = self._mainWindowUi.driverWidget.count()
+        for i in range(0, widgetsCount):
+            driver = self._mainWindowUi.driverWidget.widget(i)
+            driver.restore_settings(plugin_settings)
 
     #def trigger_configuration(self):
         # Comment in to signal that the plugin has a way to configure
@@ -52,22 +60,47 @@ class MainWindow(Plugin):
     
     def _init_widget(self, context):
         # Create QWidget
-        self._widget = QWidget()
+        self._mainWindowUi = QWidget()
         # Get path to UI file which should be in the "resource" folder of this package
-        ui_file = os.path.join(rospkg.RosPack().get_path('rqt_balancer'), 'resource', 'MainWindow.ui')
+        ui_file = os.path.join(rospkg.RosPack().get_path('rqt_balancer'), 'resource',  self.__class__.__name__ + '.ui')
         # Extend the widget with all attributes and children from UI file
-        loadUi(ui_file, self._widget)
-        # Show _widget.windowTitle on left-top of each plugin (when 
-        # it's set in _widget). This is useful when you open multiple 
+        loadUi(ui_file, self._mainWindowUi)
+        # Show _mainWindowUi.windowTitle on left-top of each plugin (when 
+        # it's set in _mainWindowUi). This is useful when you open multiple 
         # plugins at once. Also if you open multiple instances of your 
         # plugin at once, these lines add number to make it easy to 
         # tell from pane to pane.
         if context.serial_number() > 1:
-            self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+            self._mainWindowUi.setWindowTitle(self._mainWindowUi.windowTitle() + (' (%d)' % context.serial_number()))
         
-        self.pitchWidget = PidWidget( self._widget.pitchPid, "pitch_pid" )
-        self.speedWidget = PidWidget( self._widget.speedPid, "speed_pid" )
-#         sumWidget = PidWidget( self._widget.pitchPid, "sum_pid" )
+        self._mainWindowUi.driverCB.currentIndexChanged.connect( self._driverChanged )
+        self._create_driver_widget("PID_SINGLE")
+        self._create_driver_widget("PID_CASCADE")
+        self._create_driver_widget("PID_SERIAL")
         
         # Add widget to the user interface
-        context.add_widget(self._widget)
+        context.add_widget(self._mainWindowUi)
+
+    def _driverChanged(self):
+        driver_type = self._mainWindowUi.driverCB.currentText()
+        rospy.loginfo("selecting driver: %r", driver_type )
+        index = self._mainWindowUi.driverCB.currentIndex()
+        self._mainWindowUi.driverWidget.setCurrentIndex( index )
+        self.driver_type_pub.publish( str(driver_type) )
+        
+    def _create_driver_widget(self, driver_type):
+        rospy.loginfo("creating driver: %r", driver_type )
+        
+        driver = None
+        if driver_type == "PID_SINGLE":
+            driver = PidSingleWidget( self._mainWindowUi.driverWidget )
+        elif driver_type == "PID_CASCADE":
+            driver = PidCascadeWidget( self._mainWindowUi.driverWidget )
+        elif driver_type == "PID_SERIAL":
+            driver = PidSerialWidget( self._mainWindowUi.driverWidget )
+        else:
+            rospy.loginfo("unknown driver: %s", driver_type )
+    
+        self._mainWindowUi.driverWidget.addWidget( driver )
+        self._mainWindowUi.driverCB.addItem( driver_type )
+    
