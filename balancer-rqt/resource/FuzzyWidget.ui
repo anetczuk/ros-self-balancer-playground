@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>pidWidget</class>
- <widget class="QWidget" name="pidWidget">
+ <class>driverWidget</class>
+ <widget class="QWidget" name="driverWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>PID</string>
+   <string>Fuzzy Driver</string>
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="1" column="0">
@@ -134,7 +134,7 @@
    <item row="0" column="0">
     <widget class="QLabel" name="widgetName">
      <property name="text">
-      <string>PID</string>
+      <string>Fuzzy</string>
      </property>
     </widget>
    </item>
