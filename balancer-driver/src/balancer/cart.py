@@ -35,6 +35,7 @@ from std_srvs.srv import Empty
 
 from .driver.pid_single_driver import PIDSingleDriver
 from .driver.pid_cascade_driver import PIDCascadeDriver
+from .driver.fuzzy_driver import FuzzyDriver
 
 
 def rotationMatrixToEulerAngles(R):
@@ -142,8 +143,11 @@ class Cart:
             rospy.loginfo("setting cascade PID driver" )
             self.driver = PIDCascadeDriver()
             return
+        if driver_type == "FUZZY":
+            rospy.loginfo("setting cascade Fuzzy driver" )
+            self.driver = FuzzyDriver()
+            return
         rospy.loginfo("unknown driver type: %s", driver_type)
-        
         
     def _cart_fallen(self, value):
         if value.data is False:
