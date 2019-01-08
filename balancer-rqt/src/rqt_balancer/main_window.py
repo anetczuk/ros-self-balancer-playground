@@ -9,7 +9,6 @@ from python_qt_binding.QtWidgets import QWidget
 
 from .pid_single_widget import PidSingleWidget
 from .pid_cascade_widget import PidCascadeWidget
-from .pid_serial_widget import PidSerialWidget
 
 
 class MainWindow(Plugin):
@@ -76,7 +75,6 @@ class MainWindow(Plugin):
         self._mainWindowUi.driverCB.currentIndexChanged.connect( self._driverChanged )
         self._create_driver_widget("PID_SINGLE")
         self._create_driver_widget("PID_CASCADE")
-        self._create_driver_widget("PID_SERIAL")
         
         # Add widget to the user interface
         context.add_widget(self._mainWindowUi)
@@ -96,8 +94,6 @@ class MainWindow(Plugin):
             driver = PidSingleWidget( self._mainWindowUi.driverWidget )
         elif driver_type == "PID_CASCADE":
             driver = PidCascadeWidget( self._mainWindowUi.driverWidget )
-        elif driver_type == "PID_SERIAL":
-            driver = PidSerialWidget( self._mainWindowUi.driverWidget )
         else:
             rospy.loginfo("unknown driver: %s", driver_type )
     

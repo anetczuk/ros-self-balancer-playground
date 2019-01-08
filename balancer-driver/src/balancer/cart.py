@@ -35,7 +35,6 @@ from std_srvs.srv import Empty
 
 from .driver.pid_single_driver import PIDSingleDriver
 from .driver.pid_cascade_driver import PIDCascadeDriver
-from .driver.pid_serial_driver import PIDSerialDriver
 
 
 def rotationMatrixToEulerAngles(R):
@@ -142,10 +141,6 @@ class Cart:
         if driver_type == "PID_CASCADE":
             rospy.loginfo("setting cascade PID driver" )
             self.driver = PIDCascadeDriver()
-            return
-        if driver_type == "PID_SERIAL":
-            rospy.loginfo("setting serial PID driver" )
-            self.driver = PIDSerialDriver()
             return
         rospy.loginfo("unknown driver type: %s", driver_type)
         
