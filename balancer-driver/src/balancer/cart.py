@@ -33,9 +33,9 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Imu
 from std_srvs.srv import Empty
 
-from .driver.pid_single_driver import PIDSingleDriver
-from .driver.pid_cascade_driver import PIDCascadeDriver
-from .driver.fuzzy_driver import FuzzyDriver
+from .driver.pid_single_controller import PIDSingleController
+from .driver.pid_cascade_controller import PIDCascadeController
+from .driver.fuzzy_controller import FuzzyController
 
 
 def rotationMatrixToEulerAngles(R):
@@ -65,9 +65,9 @@ class Cart:
         self.euler_angles = None    ## in radians
         self.pitch = None           ## in degrees
         self.wheel_speed = None
-        self.driver = None
+        self.controller = None
         
-        self._create_driver("PID_SINGLE")
+        self._create_controller("PID_SINGLE")
         
         self.reset_simulation = rospy.ServiceProxy('/gazebo/reset_world', Empty)
 
@@ -80,7 +80,7 @@ class Cart:
         rospy.Subscriber("/teeterbot/imu", Imu, self._imu_callback)
         rospy.Subscriber("/teeterbot/right_wheel_speed", Float64, self._wheel_callback)
 
-        rospy.Subscriber("/self_balancer/driver_type", String, self._driver_type_callback)
+        rospy.Subscriber("/self_balancer/controller_type", String, self._controller_type_callback)
         pitch_pub = rospy.Publisher('/self_balancer/pitch', Float64, queue_size=10)
         output_pub = rospy.Publisher('/self_balancer/output', Float64, queue_size=10)
         
@@ -115,7 +115,7 @@ class Cart:
             except rospy.exceptions.ROSTimeMovedBackwardsException as e:
                 ## happens when world is resetted
                 rospy.loginfo("exception: %r", e )
-                self._reset_driver()
+                self._reset_controller()
 
     def drive(self):
         if self.pitch is None:
@@ -124,41 +124,41 @@ class Cart:
         if abs(self.pitch) > 70.0:
             ## no chances to keep standing -- stop wheels
             return (0.0, 0.0)
-        output = self.driver.steer( self )
+        output = self.controller.steer( self )
         if output is None:
             return (0.0, 0.0)
         return output
 
-    def _driver_type_callback(self, driver_type):
-        driver_data = driver_type.data
-        self._create_driver( driver_data )
+    def _controller_type_callback(self, controller_type):
+        controller_data = controller_type.data
+        self._create_controller( controller_data )
         
-    def _create_driver(self, driver_type):
-        rospy.loginfo("got driver: %s", driver_type)
-        if driver_type == "PID_SINGLE":
-            rospy.loginfo("setting single PID driver" )
-            self.driver = PIDSingleDriver()
+    def _create_controller(self, controller_type):
+        rospy.loginfo("got controller: %s", controller_type)
+        if controller_type == "PID_SINGLE":
+            rospy.loginfo("setting single PID controller" )
+            self.controller = PIDSingleController()
             return
-        if driver_type == "PID_CASCADE":
-            rospy.loginfo("setting cascade PID driver" )
-            self.driver = PIDCascadeDriver()
+        if controller_type == "PID_CASCADE":
+            rospy.loginfo("setting cascade PID controller" )
+            self.controller = PIDCascadeController()
             return
-        if driver_type == "FUZZY":
-            rospy.loginfo("setting cascade Fuzzy driver" )
-            self.driver = FuzzyDriver()
+        if controller_type == "FUZZY":
+            rospy.loginfo("setting cascade Fuzzy controller" )
+            self.controller = FuzzyController()
             return
-        rospy.loginfo("unknown driver type: %s", driver_type)
+        rospy.loginfo("unknown controller type: %s", controller_type)
         
     def _cart_fallen(self, value):
         if value.data is False:
             ## cart stand up
             rospy.loginfo("cart stand up - resetting simulation" )
             self.reset_simulation()
-            self._reset_driver()
+            self._reset_controller()
         
-    def _reset_driver(self):
-        rospy.loginfo("resetting driver's state" )
-        self.driver.reset_state()
+    def _reset_controller(self):
+        rospy.loginfo("resetting controller's state" )
+        self.controller.reset_state()
         
     def _imu_callback(self, imu_data):
         self.qorientation = np.quaternion( imu_data.orientation.x, imu_data.orientation.y, imu_data.orientation.z, imu_data.orientation.w )

@@ -19,7 +19,7 @@ class MainWindow(Plugin):
         # Give QObjects reasonable names
         self.setObjectName('MainWindow')
         
-        self.driver_type_pub = rospy.Publisher('/self_balancer/driver_type', String, queue_size=10, latch=True)
+        self.controller_type_pub = rospy.Publisher('/self_balancer/controller_type', String, queue_size=10, latch=True)
         
         self._parse_cmd_args(context)
         self._init_widget(context)       
@@ -29,16 +29,16 @@ class MainWindow(Plugin):
         pass
 
     def save_settings(self, plugin_settings, instance_settings):
-        widgetsCount = self._mainWindowUi.driverWidget.count()
+        widgetsCount = self._mainWindowUi.controllerWidget.count()
         for i in range(0, widgetsCount):
-            driver = self._mainWindowUi.driverWidget.widget(i)
-            driver.save_settings(plugin_settings)
+            controller = self._mainWindowUi.controllerWidget.widget(i)
+            controller.save_settings(plugin_settings)
 
     def restore_settings(self, plugin_settings, instance_settings):
-        widgetsCount = self._mainWindowUi.driverWidget.count()
+        widgetsCount = self._mainWindowUi.controllerWidget.count()
         for i in range(0, widgetsCount):
-            driver = self._mainWindowUi.driverWidget.widget(i)
-            driver.restore_settings(plugin_settings)
+            controller = self._mainWindowUi.controllerWidget.widget(i)
+            controller.restore_settings(plugin_settings)
 
     #def trigger_configuration(self):
         # Comment in to signal that the plugin has a way to configure
@@ -73,32 +73,32 @@ class MainWindow(Plugin):
         if context.serial_number() > 1:
             self._mainWindowUi.setWindowTitle(self._mainWindowUi.windowTitle() + (' (%d)' % context.serial_number()))
         
-        self._mainWindowUi.driverCB.currentIndexChanged.connect( self._driverChanged )
+        self._mainWindowUi.controllerCB.currentIndexChanged.connect( self._controllerChanged )
         
-        self._init_drivers()
+        self._init_controllers()
        
         # Add widget to the user interface
         context.add_widget(self._mainWindowUi)
 
-    def _driverChanged(self):
-        driver_type = self._mainWindowUi.driverCB.currentText()
-        rospy.loginfo("selecting driver: %r", driver_type )
-        index = self._mainWindowUi.driverCB.currentIndex()
-        self._mainWindowUi.driverWidget.setCurrentIndex( index )
-        self.driver_type_pub.publish( str(driver_type) )
+    def _controllerChanged(self):
+        controller_type = self._mainWindowUi.controllerCB.currentText()
+        rospy.loginfo("selecting controller: %r", controller_type )
+        index = self._mainWindowUi.controllerCB.currentIndex()
+        self._mainWindowUi.controllerWidget.setCurrentIndex( index )
+        self.controller_type_pub.publish( str(controller_type) )
     
-    def _init_drivers(self):
-        singlePidDriver = PidSingleWidget( self._mainWindowUi.driverWidget )
-        self._create_driver_widget("PID_SINGLE", singlePidDriver)
+    def _init_controllers(self):
+        singlePidController = PidSingleWidget( self._mainWindowUi.controllerWidget )
+        self._create_controller_widget("PID_SINGLE", singlePidController)
         
-        cascadePidDriver = PidCascadeWidget( self._mainWindowUi.driverWidget )
-        self._create_driver_widget("PID_CASCADE", cascadePidDriver)
+        cascadePidController = PidCascadeWidget( self._mainWindowUi.controllerWidget )
+        self._create_controller_widget("PID_CASCADE", cascadePidController)
         
-        fuzzyDriver = FuzzyWidget( self._mainWindowUi.driverWidget )
-        self._create_driver_widget("FUZZY", fuzzyDriver)
+        fuzzyController = FuzzyWidget( self._mainWindowUi.controllerWidget )
+        self._create_controller_widget("FUZZY", fuzzyController)
     
-    def _create_driver_widget(self, driver_type, driver):
-        rospy.loginfo("registering driver: %r", driver_type )
-        self._mainWindowUi.driverWidget.addWidget( driver )
-        self._mainWindowUi.driverCB.addItem( driver_type )
+    def _create_controller_widget(self, controller_type, controller):
+        rospy.loginfo("registering controller: %r", controller_type )
+        self._mainWindowUi.controllerWidget.addWidget( controller )
+        self._mainWindowUi.controllerCB.addItem( controller_type )
 

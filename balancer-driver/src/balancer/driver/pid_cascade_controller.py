@@ -24,14 +24,14 @@
 
 import rospy
     
-from ..cart_driver import CartDriver
+from ..cart_controller import CartController
 from .pid_object import PIDObject
 
 
-class PIDCascadeDriver(CartDriver):
+class PIDCascadeController(CartController):
 
     def __init__(self):
-        CartDriver.__init__(self)
+        CartController.__init__(self)
         self.speedpid = PIDObject("cascade_pid/speed", 30.0)
         self.speedpid.set_params( -0.5, -0.3, 1.6 )
         self.pitchpid = PIDObject("cascade_pid/pitch", 10.0)

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>driverWidget</class>
- <widget class="QWidget" name="driverWidget">
+ <class>controllerWidget</class>
+ <widget class="QWidget" name="controllerWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Fuzzy Driver</string>
+   <string>Fuzzy Controller</string>
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="1" column="0">

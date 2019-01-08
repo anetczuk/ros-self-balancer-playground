@@ -1,3 +1,4 @@
+#
 # MIT License
 #
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
@@ -22,27 +23,23 @@
 #
 
 
-import rospy
-    
-from ..cart_driver import CartDriver
-from .pid_object import PIDObject
+import abc
 
 
-class PIDSingleDriver(CartDriver):
+class CartController(metaclass=abc.ABCMeta):
 
     def __init__(self):
-        CartDriver.__init__(self)
-        self.pitchpid = PIDObject("single_pid/pitch", 10.0)
-        self.pitchpid.set_params( 0.6, 0.1, 1.6 )
+        pass
 
+    @abc.abstractmethod
     def reset_state(self):
-        rospy.loginfo("resetting PID" )
-        self.pitchpid.reset_state()
+        """Reset controller state.
         
-    def steer(self, cart):
-        pitch = cart.pitch
-        pitchValue = self.pitchpid.calc( pitch )
-        
-        rospy.loginfo("pid: %+.8f -> %+.8f", pitch, pitchValue)
-        return (pitchValue, pitchValue)
+           It's called when cart stands up after fall.
+        """
+        raise NotImplementedError('You need to define this method in derived class!')
     
+    @abc.abstractmethod
+    def steer(self, cart):
+        """Calculate output for left and right wheel based on pitch."""
+        raise NotImplementedError('You need to define this method in derived class!')

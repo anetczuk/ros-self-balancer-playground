@@ -23,23 +23,26 @@
 
 
 import rospy
-
-import numpy as np
-import skfuzzy as fuzz
     
-from ..cart_driver import CartDriver
+from ..cart_controller import CartController
+from .pid_object import PIDObject
 
 
-class FuzzyDriver(CartDriver):
+class PIDSingleController(CartController):
 
     def __init__(self):
-        CartDriver.__init__(self)
+        CartController.__init__(self)
+        self.pitchpid = PIDObject("single_pid/pitch", 10.0)
+        self.pitchpid.set_params( 0.6, 0.1, 1.6 )
 
     def reset_state(self):
-        rospy.loginfo("resetting Fuzzy" )
+        rospy.loginfo("resetting PID" )
+        self.pitchpid.reset_state()
         
     def steer(self, cart):
-        # pitch = cart.pitch
-        ## rospy.loginfo("pid: %+.8f -> %+.8f", pitch, pitchValue)
-        return (0, 0)
+        pitch = cart.pitch
+        pitchValue = self.pitchpid.calc( pitch )
+        
+        rospy.loginfo("pid: %+.8f -> %+.8f", pitch, pitchValue)
+        return (pitchValue, pitchValue)
     

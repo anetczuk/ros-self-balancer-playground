@@ -1,4 +1,3 @@
-#
 # MIT License
 #
 # Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
@@ -23,23 +22,24 @@
 #
 
 
-import abc
+import rospy
+
+import numpy as np
+import skfuzzy as fuzz
+    
+from ..cart_controller import CartController
 
 
-class CartDriver(metaclass=abc.ABCMeta):
+class FuzzyController(CartController):
 
     def __init__(self):
-        pass
+        CartController.__init__(self)
 
-    @abc.abstractmethod
     def reset_state(self):
-        """Reset driver state.
+        rospy.loginfo("resetting Fuzzy" )
         
-           It's called when cart stands up after fall.
-        """
-        raise NotImplementedError('You need to define this method in derived class!')
-    
-    @abc.abstractmethod
     def steer(self, cart):
-        """Calculate output for left and right wheel based on pitch."""
-        raise NotImplementedError('You need to define this method in derived class!')
+        # pitch = cart.pitch
+        ## rospy.loginfo("pid: %+.8f -> %+.8f", pitch, pitchValue)
+        return (0, 0)
+    
