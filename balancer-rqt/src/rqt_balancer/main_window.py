@@ -74,10 +74,9 @@ class MainWindow(Plugin):
             self._mainWindowUi.setWindowTitle(self._mainWindowUi.windowTitle() + (' (%d)' % context.serial_number()))
         
         self._mainWindowUi.driverCB.currentIndexChanged.connect( self._driverChanged )
-        self._create_driver_widget("PID_SINGLE")
-        self._create_driver_widget("PID_CASCADE")
-        self._create_driver_widget("FUZZY")
         
+        self._init_drivers()
+       
         # Add widget to the user interface
         context.add_widget(self._mainWindowUi)
 
@@ -87,20 +86,19 @@ class MainWindow(Plugin):
         index = self._mainWindowUi.driverCB.currentIndex()
         self._mainWindowUi.driverWidget.setCurrentIndex( index )
         self.driver_type_pub.publish( str(driver_type) )
-        
-    def _create_driver_widget(self, driver_type):
-        rospy.loginfo("creating driver: %r", driver_type )
-        
-        driver = None
-        if driver_type == "PID_SINGLE":
-            driver = PidSingleWidget( self._mainWindowUi.driverWidget )
-        elif driver_type == "PID_CASCADE":
-            driver = PidCascadeWidget( self._mainWindowUi.driverWidget )
-        elif driver_type == "FUZZY":
-            driver = FuzzyWidget( self._mainWindowUi.driverWidget )
-        else:
-            rospy.loginfo("unknown driver: %s", driver_type )
     
+    def _init_drivers(self):
+        singlePidDriver = PidSingleWidget( self._mainWindowUi.driverWidget )
+        self._create_driver_widget("PID_SINGLE", singlePidDriver)
+        
+        cascadePidDriver = PidCascadeWidget( self._mainWindowUi.driverWidget )
+        self._create_driver_widget("PID_CASCADE", cascadePidDriver)
+        
+        fuzzyDriver = FuzzyWidget( self._mainWindowUi.driverWidget )
+        self._create_driver_widget("FUZZY", fuzzyDriver)
+    
+    def _create_driver_widget(self, driver_type, driver):
+        rospy.loginfo("registering driver: %r", driver_type )
         self._mainWindowUi.driverWidget.addWidget( driver )
         self._mainWindowUi.driverCB.addItem( driver_type )
-    
+
