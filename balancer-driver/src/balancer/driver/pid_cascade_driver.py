@@ -49,9 +49,9 @@ class PIDCascadeDriver(CartDriver):
             return (0.0, 0.0)
 
         speedValue = self.speedpid.steer( speedInput )
-        self.pitchpid.set_target(speedValue)
-        pitchValue = self.pitchpid.steer( pitchInput )
+        pitchValue = pitchInput - speedValue
+        outputValue = self.pitchpid.steer( pitchValue )
         
-        rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f", pitchInput, speedInput, speedValue, pitchValue)
-        return (pitchValue, pitchValue)
+        rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f", pitchInput, speedInput, speedValue, outputValue)
+        return (outputValue, outputValue)
     
