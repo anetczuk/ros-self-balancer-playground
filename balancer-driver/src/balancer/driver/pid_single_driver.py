@@ -33,7 +33,7 @@ class PIDSingleDriver(CartDriver):
     def __init__(self):
         CartDriver.__init__(self)
         self.pitchpid = PIDObject("single_pid/pitch", 10.0)
-        self.pitchpid.set_params( 1.0, 0.6, 0.3 )
+        self.pitchpid.set_params( 0.6, 0.1, 1.6 )
 
     def reset_state(self):
         rospy.loginfo("resetting PID" )
