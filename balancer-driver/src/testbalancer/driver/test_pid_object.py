@@ -32,7 +32,7 @@ class PIDObjectTest(unittest.TestCase):
     def setUp(self):
         self.pid = PID()
         self.pid.reset_state()
-        self.pid.steer( 0.0 )             ## first call -- initialize
+        self.pid.calc( 0.0 )             ## first call -- initialize
 
     def tearDown(self):
         self.pid = None
@@ -40,20 +40,20 @@ class PIDObjectTest(unittest.TestCase):
     def test_setpoint_poportinal(self):
         self.pid.set_params(1.0, 0.0, 0.0)
         self.pid.set_target(1.0)
-        output = self.pid.steer( 2.0 )
+        output = self.pid.calc( 2.0 )
         self.assertEqual( -1.0, output )
         
     def test_setpoint_integral(self):
         self.pid.set_params(0.0, 1.0, 0.0)
         self.pid.set_target(1.0)
         self.pid.set_last_time( _current_time() - 1 )      ## mimic time pass
-        output = self.pid.steer( 2.0 )
+        output = self.pid.calc( 2.0 )
         self.assertAlmostEqual( -1.0, output, delta=0.0001 )
         
     def test_setpoint_derivative(self):
         self.pid.set_params(0.0, 0.0, 1.0)
         self.pid.set_target(1.0)
-        output = self.pid.steer( 2.0 )
+        output = self.pid.calc( 2.0 )
         self.assertEqual( -1.0, output )
         
 

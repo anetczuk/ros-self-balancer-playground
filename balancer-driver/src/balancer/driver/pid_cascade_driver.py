@@ -48,9 +48,9 @@ class PIDCascadeDriver(CartDriver):
         if speedInput is None:
             return (0.0, 0.0)
 
-        speedValue = self.speedpid.steer( speedInput )
+        speedValue = self.speedpid.calc( speedInput )
         pitchValue = pitchInput - speedValue
-        outputValue = self.pitchpid.steer( pitchValue )
+        outputValue = self.pitchpid.calc( pitchValue )
         
         rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f", pitchInput, speedInput, speedValue, outputValue)
         return (outputValue, outputValue)

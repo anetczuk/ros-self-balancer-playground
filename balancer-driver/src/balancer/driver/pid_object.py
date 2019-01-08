@@ -43,29 +43,6 @@ class PIDClassic():
         
         self.reset_state()
     
-    def is_enabled(self):
-        if abs(self.pid.Kp) > 0.0001:
-            return True
-        if abs(self.pid.Ki) > 0.0001:
-            return True
-        if abs(self.pid.Kd) > 0.0001:
-            return True
-        return False
-    
-    def set_params(self, kp, ki, kd):
-        self.pid.tunings = (kp, ki, kd)
-    
-    def set_target(self, value):
-        self.target_point = value
-        
-    def set_last_time(self, value):
-        self.pid._last_time = value
-    
-    def steer(self, inputValue):
-        error = -(self.target_point - inputValue)     ## yes, with negation sign
-        val = self.pid( error )
-        return val
-    
     def reset_state(self):
         ## nice params p:1.5 d:08 i:0.2 on voltage control
 #         newPid = PID(0.0, 0.0, 0.0, sample_time=None, proportional_on_measurement=False)
@@ -78,8 +55,31 @@ class PIDClassic():
             newPid.setpoint = self.pid.setpoint
         self.pid = newPid
     
+    def is_enabled(self):
+        if abs(self.pid.Kp) > 0.0001:
+            return True
+        if abs(self.pid.Ki) > 0.0001:
+            return True
+        if abs(self.pid.Kd) > 0.0001:
+            return True
+        return False
+    
     def error_sum(self):
         return self.pid._error_sum + self.pid._proportional
+    
+    def set_params(self, kp, ki, kd):
+        self.pid.tunings = (kp, ki, kd)
+    
+    def set_target(self, value):
+        self.target_point = value
+        
+    def set_last_time(self, value):
+        self.pid._last_time = value
+    
+    def calc(self, inputValue):
+        error = -(self.target_point - inputValue)     ## yes, with negation sign
+        val = self.pid( error )
+        return val
     
     def state(self):
         return "%r %r" % ( self.pid._error_sum, self.pid._proportional ) 
@@ -108,11 +108,11 @@ class PIDObject():
     def set_target(self, value):
         self.pid.target_point( value )
     
-    def steer(self, inputValue):
+    def calc(self, inputValue):
         if inputValue is None:
             return None
         self.input_pub.publish( inputValue )
-        val = self.pid.steer( inputValue )
+        val = self.pid.calc( inputValue )
 #         rospy.loginfo("pid: %r -> %r di:%r es:%r p:%r", pitch, val, dinput, self.pid._error_sum, self.pid._proportional )
         self.error_pub.publish( self.pid.error_sum() )
         self.output_pub.publish( val )

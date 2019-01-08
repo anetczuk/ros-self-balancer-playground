@@ -41,7 +41,7 @@ class PIDSingleDriver(CartDriver):
         
     def steer(self, cart):
         pitch = cart.pitch
-        pitchValue = self.pitchpid.steer( pitch )
+        pitchValue = self.pitchpid.calc( pitch )
         
         rospy.loginfo("pid: %+.8f -> %+.8f", pitch, pitchValue)
         return (pitchValue, pitchValue)
