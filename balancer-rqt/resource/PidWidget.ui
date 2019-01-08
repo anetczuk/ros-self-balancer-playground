@@ -62,6 +62,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QDoubleSpinBox" name="kpSB">
+       <property name="decimals">
+        <number>4</number>
+       </property>
        <property name="minimum">
         <double>-9999.000000000000000</double>
        </property>
@@ -99,6 +102,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QDoubleSpinBox" name="kdSB">
+       <property name="decimals">
+        <number>4</number>
+       </property>
        <property name="minimum">
         <double>-9999.000000000000000</double>
        </property>
@@ -143,6 +149,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QDoubleSpinBox" name="kiSB">
+       <property name="decimals">
+        <number>4</number>
+       </property>
        <property name="minimum">
         <double>-9999.000000000000000</double>
        </property>

@@ -32,10 +32,10 @@ class PIDCascadeDriver(CartDriver):
 
     def __init__(self):
         CartDriver.__init__(self)
-        self.pitchpid = PIDObject("cascade_pid/pitch", 10.0)
-        self.pitchpid.set_params( 0.5, 0.6, 2.0 )
         self.speedpid = PIDObject("cascade_pid/speed", 30.0)
-        self.speedpid.set_params( -0.5, -0.3, 2.0 )
+        self.speedpid.set_params( -0.5, -0.3, 1.6 )
+        self.pitchpid = PIDObject("cascade_pid/pitch", 10.0)
+        self.pitchpid.set_params( 0.5, 0.6, 1.6 )
 
     def reset_state(self):
         rospy.loginfo("resetting PID" )
@@ -52,6 +52,8 @@ class PIDCascadeDriver(CartDriver):
         pitchValue = pitchInput - speedValue
         outputValue = self.pitchpid.calc( pitchValue )
         
-        rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f", pitchInput, speedInput, speedValue, outputValue)
+        err_speed = self.speedpid.error_sum()
+        err_pitch = self.pitchpid.error_sum()
+        rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f e: %+.8f %+.8f", pitchInput, speedInput, speedValue, outputValue, err_speed, err_pitch)
         return (outputValue, outputValue)
     

@@ -99,8 +99,14 @@ class PIDObject():
         self.error_pub = rospy.Publisher("/self_balancer/" + pidname + "/error", Float64, queue_size=10)
         self.output_pub = rospy.Publisher("/self_balancer/" + pidname + "/output", Float64, queue_size=10)
     
+    def reset_state(self):
+        self.pid.reset_state()
+    
     def is_enabled(self):
         return self.pid.is_enabled()
+    
+    def error_sum(self):
+        return self.pid.error_sum()       
     
     def set_params(self, kp, ki, kd):
         self.pid.set_params(kp, ki, kd)
@@ -117,10 +123,7 @@ class PIDObject():
         self.error_pub.publish( self.pid.error_sum() )
         self.output_pub.publish( val )
         return val
-    
-    def reset_state(self):
-        self.pid.reset_state()
-    
+       
     def state(self):
         self.pid.state()
     
