@@ -24,22 +24,31 @@
 
 import rospy
 
-import numpy as np
-import skfuzzy as fuzz
-    
 from ..cart_controller import CartController
+from .fuzzy_object import FuzzyObject
 
 
 class FuzzyController(CartController):
 
     def __init__(self):
         CartController.__init__(self)
+        self.pitchfuzzy = FuzzyObject("double_fuzzy/pitch")
+        self.speedfuzzy = FuzzyObject("double_fuzzy/speed")
 
     def reset_state(self):
         rospy.loginfo("resetting Fuzzy" )
+        self.pitchfuzzy.reset_state()
+        self.speedfuzzy.reset_state()
         
     def steer(self, cart):
-        # pitch = cart.pitch
-        ## rospy.loginfo("pid: %+.8f -> %+.8f", pitch, pitchValue)
-        return (0, 0)
-    
+        pitchInput = cart.pitch
+        speedInput = cart.wheel_speed
+        if speedInput is None:
+            return (0.0, 0.0)
+        
+        pitchOutput = self.pitchfuzzy.calc(pitchInput)
+        speedOutput = self.speedfuzzy.calc(speedInput)
+        output = pitchOutput + speedOutput
+        
+        rospy.loginfo("fuzzy: %+.8f %+.8f -> %+.8f", pitchInput, speedInput, output)
+        return (output, output)

@@ -9,7 +9,7 @@ from python_qt_binding.QtWidgets import QWidget
 
 from .pid_single_widget import PidSingleWidget
 from .pid_cascade_widget import PidCascadeWidget
-from .fuzzy_widget import FuzzyWidget
+from .fuzzy_double_widget import FuzzyDoubleWidget
 
 
 class MainWindow(Plugin):
@@ -94,8 +94,8 @@ class MainWindow(Plugin):
         cascadePidController = PidCascadeWidget( self._mainWindowUi.controllerWidget )
         self._create_controller_widget("PID_CASCADE", cascadePidController)
         
-        fuzzyController = FuzzyWidget( self._mainWindowUi.controllerWidget )
-        self._create_controller_widget("FUZZY", fuzzyController)
+        doubleFuzzyController = FuzzyDoubleWidget( self._mainWindowUi.controllerWidget )
+        self._create_controller_widget("FUZZY_DOUBLE", doubleFuzzyController)
     
     def _create_controller_widget(self, controller_type, controller):
         rospy.loginfo("registering controller: %r", controller_type )

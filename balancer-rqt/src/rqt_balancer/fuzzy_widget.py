@@ -10,7 +10,7 @@ from python_qt_binding.QtWidgets import QWidget
 
 class FuzzyWidget(QWidget):
 
-    def __init__(self, parent):
+    def __init__(self, parent, fuzzyName):
         super(FuzzyWidget, self).__init__(parent)
         # Create QWidget
         # Get path to UI file which should be in the "resource" folder of this package
@@ -19,50 +19,41 @@ class FuzzyWidget(QWidget):
         loadUi(ui_file, self)
         # Give QObjects reasonable names
         
-        self.controller_name = "fuzzy"
+        self.controller_name = fuzzyName
         self.widgetName.setText( self.controller_name )
         
-        self.setpoint_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/setpoint', Float64, queue_size=10, latch=True)
-        self.kp_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/kp', Float64, queue_size=10, latch=True)
-        self.ki_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/ki', Float64, queue_size=10, latch=True)
-        self.kd_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/kd', Float64, queue_size=10, latch=True)
+        self.pitch_max_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/err_max', Float64, queue_size=10, latch=True)
+        self.speed_max_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/derr_max', Float64, queue_size=10, latch=True)
+        self.voltage_max_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/output_max', Float64, queue_size=10, latch=True)
          
-        self.setpointSB.valueChanged.connect( self._setpointSB_changed )
-        self.kpSB.valueChanged.connect( self._kpSB_changed )
-        self.kiSB.valueChanged.connect( self._kiSB_changed )
-        self.kdSB.valueChanged.connect( self._kdSB_changed )
+        self.errSB.valueChanged.connect( self._errSB_changed )
+        self.derrSB.valueChanged.connect( self._derrSB_changed )
+        self.outputSB.valueChanged.connect( self._outputSB_changed )
     
-    def _setpointSB_changed(self, value):
-        print( self.controller_name, ' setpoint changed: ', value)
-        self.setpoint_pub.publish(value)
+    def _errSB_changed(self, value):
+        print( self.controller_name, ' err changed: ', value)
+        self.pitch_max_pub.publish(value)
          
-    def _kpSB_changed(self, value):
-        print( self.controller_name, ' kp changed: ', value)
-        self.kp_pub.publish(value)
+    def _derrSB_changed(self, value):
+        print( self.controller_name, ' derr changed: ', value)
+        self.speed_max_pub.publish(value)
      
-    def _kiSB_changed(self, value):
-        print( self.controller_name, ' ki changed: ', value)
-        self.ki_pub.publish(value)
-     
-    def _kdSB_changed(self, value):
-        print( self.controller_name, ' kd changed: ', value)
-        self.kd_pub.publish(value)
-    
+    def _outputSB_changed(self, value):
+        print( self.controller_name, ' output changed: ', value)
+        self.voltage_max_pub.publish(value)
+        
     def save_settings(self, plugin_settings):
         settings = plugin_settings.get_settings(self.controller_name)
-        settings.set_value("setpoint", self.setpointSB.value() )
-        settings.set_value("kp", self.kpSB.value() )
-        settings.set_value("ki", self.kiSB.value() )
-        settings.set_value("kd", self.kdSB.value() )
+        settings.set_value("err", self.errSB.value() )
+        settings.set_value("derr", self.derrSB.value() )
+        settings.set_value("output", self.outputSB.value() )
 
     def restore_settings(self, plugin_settings):
         settings = plugin_settings.get_settings(self.controller_name)
-        setpoint = settings.value("setpoint", 0)
-        self.setpointSB.setValue( float(setpoint) )
-        kp = settings.value("kp", 0)
-        self.kpSB.setValue( float(kp) )
-        ki = settings.value("ki", 0)
-        self.kiSB.setValue( float(ki) )
-        kd = settings.value("kd", 0)
-        self.kdSB.setValue( float(kd) )
+        err = settings.value("err", 0)
+        self.errSB.setValue( float(err) )
+        derr = settings.value("derr", 0)
+        self.derrSB.setValue( float(derr) )
+        output = settings.value("output", 0)
+        self.outputSB.setValue( float(output) )
     

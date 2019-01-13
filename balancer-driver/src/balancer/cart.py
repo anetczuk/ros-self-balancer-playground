@@ -143,8 +143,8 @@ class Cart:
             rospy.loginfo("setting cascade PID controller" )
             self.controller = PIDCascadeController()
             return
-        if controller_type == "FUZZY":
-            rospy.loginfo("setting cascade Fuzzy controller" )
+        if controller_type == "FUZZY_DOUBLE":
+            rospy.loginfo("setting double Fuzzy controller" )
             self.controller = FuzzyController()
             return
         rospy.loginfo("unknown controller type: %s", controller_type)
