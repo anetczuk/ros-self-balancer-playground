@@ -32,8 +32,8 @@ class FuzzyController(CartController):
 
     def __init__(self):
         CartController.__init__(self)
-        self.pitchfuzzy = FuzzyObject("double_fuzzy/pitch")
-        self.speedfuzzy = FuzzyObject("double_fuzzy/speed")
+        self.pitchfuzzy = FuzzyObject("double_fuzzy/pitch", 10.0, 10.0, 80.0 )
+        self.speedfuzzy = FuzzyObject("double_fuzzy/speed", 50.0, 100.0, 50.0 )
 
     def reset_state(self):
         rospy.loginfo("resetting Fuzzy" )

@@ -58,11 +58,11 @@ class FuzzyType(Enum):
 
 class Fuzzy():
     
-    def __init__(self):
+    def __init__(self, err_param=90, derr_param=30, output_param=20):
         self.error = Error()
-        self.set_err_range(90)
-        self.set_derr_range(30)
-        self.set_output_range(20)
+        self.set_err_range( err_param )
+        self.set_derr_range( derr_param )
+        self.set_output_range( output_param )
         self.build()
 
     @synchronized
@@ -202,6 +202,7 @@ class Fuzzy():
         fuzzy_type = self.type()
         
         if fuzzy_type == FuzzyType.INVALID:
+            self.error.calculate(valueInput)
             return 0
             
         err = self.error.calculate(valueInput)
@@ -224,9 +225,9 @@ class Fuzzy():
 
 class FuzzyObject():
 
-    def __init__(self, controller_name):
+    def __init__(self, controller_name, err_param=90, derr_param=30, output_param=20):
         self.controller_name = controller_name
-        self.fuzzy = Fuzzy()
+        self.fuzzy = Fuzzy(err_param, derr_param, output_param)
         
         rospy.Subscriber("/self_balancer/" + self.controller_name + "/err_max", Float64, self._err_callback)
         rospy.Subscriber("/self_balancer/" + self.controller_name + "/derr_max", Float64, self._derr_callback)
