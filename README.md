@@ -1,11 +1,12 @@
 # Two Wheel Balancer
 
+
 ## Running application
 
 To run application try one of:
-- run *src/drive*
-- run *src/balancer/main.py* 
-- execute *cd src; python3 -m balancer*
+- run *balancer-driver/src/drive*
+- run *balancer-driver/src/balancer/main.py* 
+- execute *cd balancer-driver/src; python3 -m balancer*
 
 
 ### Running tests
@@ -29,6 +30,21 @@ Packages list:
 
 Fix/detect:
 ```rqt --force-discover```
+
+
+## Running system
+
+- start core: ```roscore```
+- launch Gazebo with robot world ```roslaunch teeterbot_gazebo teeterbot_empty_world.launch```
+- start *balancer* driver
+- start *rqt* GUI
+- run *balancer-driver/plot*.sh* to observer inputs and outputs
+
+
+## Required libraries
+
+- *numpy-quaternion*
+- *matplotlib*
 
 
 # References
