@@ -1,5 +1,4 @@
-/.settings
-/.project
-/.pydevproject
-*.pyc
 /tmp
+/build/
+/devel/
+/.catkin_workspace
