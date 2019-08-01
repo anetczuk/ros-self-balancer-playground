@@ -37,7 +37,7 @@ class FuzzyTest(unittest.TestCase):
     def test_PP(self):
         output = self.fuzzy.compute( 10.0 )
         self.assertLess( output, 0.0 )
-    
+
     def test_NN(self):
         output = self.fuzzy.compute( -10.0 )
         self.assertLess( output, 0.0 )

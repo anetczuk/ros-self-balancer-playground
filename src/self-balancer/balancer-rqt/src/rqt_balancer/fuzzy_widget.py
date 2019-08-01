@@ -18,35 +18,35 @@ class FuzzyWidget(QWidget):
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self)
         # Give QObjects reasonable names
-        
+
         self.controller_name = fuzzyName
         self.widgetName.setText( self.controller_name )
-        
+
         self.pitch_max_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/err_max', Float64, queue_size=10, latch=True)
         self.speed_max_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/derr_max', Float64, queue_size=10, latch=True)
         self.voltage_max_pub = rospy.Publisher('/self_balancer/' + self.controller_name + '/output_max', Float64, queue_size=10, latch=True)
-        
+
         self.prevErrVal = None
         self.prevDerrVal = None
-        
+
         self.errSB.valueChanged.connect( self._errSB_changed )
         self.derrSB.valueChanged.connect( self._derrSB_changed )
         self.errEnabledCB.stateChanged.connect( self._err_enable_changed )
         self.derrEnabledCB.stateChanged.connect( self._derr_enable_changed )
         self.outputSB.valueChanged.connect( self._outputSB_changed )
-    
+
     def _errSB_changed(self, value):
         print( self.controller_name, ' err changed: ', value)
         self.pitch_max_pub.publish(value)
-         
+
     def _derrSB_changed(self, value):
         print( self.controller_name, ' derr changed: ', value)
         self.speed_max_pub.publish(value)
-     
+
     def _outputSB_changed(self, value):
         print( self.controller_name, ' output changed: ', value)
         self.voltage_max_pub.publish(value)
-        
+
     def _err_enable_changed(self, value):
         if value == 0:
             self.prevErrVal = self.errSB.value()
@@ -56,7 +56,7 @@ class FuzzyWidget(QWidget):
             if self.prevErrVal is not None:
                 self.errSB.setValue( self.prevErrVal )
             self.errSB.setEnabled( True )
-    
+
     def _derr_enable_changed(self, value):
         if value == 0:
             self.prevDerrVal = self.derrSB.value()
@@ -66,7 +66,7 @@ class FuzzyWidget(QWidget):
             if self.prevDerrVal is not None:
                 self.derrSB.setValue( self.prevDerrVal )
             self.derrSB.setEnabled( True )
-        
+
     def save_settings(self, plugin_settings):
         settings = plugin_settings.get_settings(self.controller_name)
         settings.set_value("err", self.errSB.value() )
@@ -81,4 +81,3 @@ class FuzzyWidget(QWidget):
         self.derrSB.setValue( float(derr) )
         output = settings.value("output", 0)
         self.outputSB.setValue( float(output) )
-    

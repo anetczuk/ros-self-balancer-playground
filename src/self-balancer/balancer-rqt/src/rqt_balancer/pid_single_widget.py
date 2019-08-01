@@ -17,10 +17,9 @@ class PidSingleWidget(QWidget):
         # Extend the widget with all attributes and children from UI file
         loadUi(ui_file, self)
         self.pidWidget = PidWidget( self.widget, "single_pid/pitch" )
-    
+
     def save_settings(self, plugin_settings):
         self.pidWidget.save_settings(plugin_settings)
 
     def restore_settings(self, plugin_settings):
         self.pidWidget.restore_settings(plugin_settings)
-    

@@ -39,11 +39,11 @@ try:
     # Make sure that we are using QT5
     matplotlib.use('Qt5Agg')
     from PyQt5.QtWidgets import qApp
-    
+
     import matplotlib.pyplot as plt
     ##print("all backends:", plt.rcsetup.all_backends )
     ##print("current backend:", plt.get_backend() )
-    
+
 except ImportError:
     ### No module named <name>
     #logging.exception("Exception while importing")
@@ -83,9 +83,9 @@ class Cart:
         self.pitch = None           ## in degrees
         self.wheel_speed = None
         self.controller = None
-        
+
         self._create_controller("PID_SINGLE")
-        
+
         self.reset_simulation = rospy.ServiceProxy('/gazebo/reset_world', Empty)
 
     def run(self):
@@ -100,7 +100,7 @@ class Cart:
         rospy.Subscriber("/self_balancer/controller_type", String, self._controller_type_callback)
         pitch_pub = rospy.Publisher('/self_balancer/pitch', Float64, queue_size=10)
         output_pub = rospy.Publisher('/self_balancer/output', Float64, queue_size=10)
-        
+
 #         left_pub = rospy.Publisher('/teeterbot/left_torque_cmd', Float64, queue_size=10)
 #         right_pub = rospy.Publisher('/teeterbot/right_torque_cmd', Float64, queue_size=10)
         left_pub = rospy.Publisher('/teeterbot/left_motor_voltage', Float64, queue_size=10)
@@ -111,7 +111,7 @@ class Cart:
         while not rospy.is_shutdown():
             ##str = "hello world %s"%rospy.get_time()
             #val = random.uniform(-1.0, 1.0)
-            
+
             pitch_pub.publish( self.pitch )
 
             output = self.drive()
@@ -126,10 +126,10 @@ class Cart:
                 left_pub.publish(0.0)
                 right_pub.publish(0.0)
                 output_pub.publish(0.0)
-            
+
             ## redraw plot windows
             qApp.processEvents()
-            
+
             try:
                 r.sleep()
             except rospy.exceptions.ROSTimeMovedBackwardsException as e:
@@ -152,7 +152,7 @@ class Cart:
     def _controller_type_callback(self, controller_type):
         controller_data = controller_type.data
         self._create_controller( controller_data )
-        
+
     def _create_controller(self, controller_type):
         rospy.loginfo("got controller: %s", controller_type)
         if controller_type == "PID_SINGLE":
@@ -174,31 +174,30 @@ class Cart:
             self.controller = FuzzyController()
             return
         rospy.loginfo("unknown controller type: %s", controller_type)
-        
+
     def _cart_fallen(self, value):
         if value.data is False:
             ## cart stand up
             rospy.loginfo("cart stand up - resetting simulation" )
             self.reset_simulation()
             self._reset_controller()
-        
+
     def _reset_controller(self):
         rospy.loginfo("resetting controller's state" )
         self.controller.reset_state()
-        
+
     def _imu_callback(self, imu_data):
         self.qorientation = np.quaternion( imu_data.orientation.x, imu_data.orientation.y, imu_data.orientation.z, imu_data.orientation.w )
         quat_vecs = quaternion.as_rotation_matrix( self.qorientation )
         self.euler_angles = rotationMatrixToEulerAngles( quat_vecs )           ## yaw, pitch, roll
         pitchrad = self.euler_angles[1]
-        
+
         ## change pitch sign, to the same as of wheel speed
         self.pitch = math.degrees(pitchrad)
         ## rospy.loginfo(rospy.get_caller_id()+"Imu received: %r %r", imuangle, angledeg )
-        
+
 #         self.euler_angles = quaternion.as_euler_angles(self.qorientation)           ## yaw pitch roll
 #         rospy.loginfo(rospy.get_caller_id()+"Imu received: %r", self.euler_angles )
 
     def _wheel_callback(self, wheel_data):
         self.wheel_speed = wheel_data.data
-        

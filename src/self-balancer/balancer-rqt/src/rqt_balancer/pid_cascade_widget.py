@@ -18,7 +18,7 @@ class PidCascadeWidget(QWidget):
         loadUi(ui_file, self)
         self.pitchPidWidget = PidWidget( self.pitchWidget, "cascade_pid/pitch" )
         self.speedPidWidget = PidWidget( self.speedWidget, "cascade_pid/speed" )
-    
+
     def save_settings(self, plugin_settings):
         self.pitchPidWidget.save_settings(plugin_settings)
         self.speedPidWidget.save_settings(plugin_settings)
@@ -26,4 +26,3 @@ class PidCascadeWidget(QWidget):
     def restore_settings(self, plugin_settings):
         self.pitchPidWidget.restore_settings(plugin_settings)
         self.speedPidWidget.restore_settings(plugin_settings)
-    

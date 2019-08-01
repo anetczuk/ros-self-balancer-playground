@@ -39,17 +39,17 @@ class FuzzyController(CartController):
         rospy.loginfo("resetting Fuzzy" )
         self.pitchfuzzy.reset_state()
         self.speedfuzzy.reset_state()
-        
+
     def steer(self, cart):
         pitchInput = cart.pitch
         speedInput = cart.wheel_speed
         if speedInput is None:
             return (0.0, 0.0)
-        
+
         pitchOutput = self.pitchfuzzy.calc(pitchInput)
         speedOutput = self.speedfuzzy.calc(speedInput)
         output = pitchOutput + speedOutput
-        
+
         rospy.loginfo("fuzzy: %+.8f %+.8f -> %+.8f", pitchInput, speedInput, output)
         return (output, output)
 
@@ -57,4 +57,3 @@ class FuzzyController(CartController):
         ## do nothing
         self.pitchfuzzy.close()
         self.speedfuzzy.close()
-    

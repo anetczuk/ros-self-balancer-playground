@@ -34,16 +34,16 @@ class CartController(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def reset_state(self):
         """Reset controller state.
-        
+
            It's called when cart stands up after fall.
         """
         raise NotImplementedError('You need to define this method in derived class!')
-    
+
     @abc.abstractmethod
     def steer(self, cart):
         """Calculate output for left and right wheel based on pitch."""
         raise NotImplementedError('You need to define this method in derived class!')
-    
+
     @abc.abstractmethod
     def terminate(self):
         """Close controller before destructing it."""

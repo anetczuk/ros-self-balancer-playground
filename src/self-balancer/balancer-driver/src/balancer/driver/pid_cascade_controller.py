@@ -23,7 +23,7 @@
 
 
 import rospy
-    
+
 from ..cart_controller import CartController
 from .pid_object import PIDObject
 
@@ -41,8 +41,8 @@ class PIDCascadeController(CartController):
         rospy.loginfo("resetting PID" )
         self.pitchpid.reset_state()
         self.speedpid.reset_state()
-        
-    def steer(self, cart):       
+
+    def steer(self, cart):
         pitchInput = cart.pitch
         speedInput = cart.wheel_speed
         if speedInput is None:
@@ -51,13 +51,12 @@ class PIDCascadeController(CartController):
         speedValue = self.speedpid.calc( speedInput )
         pitchValue = pitchInput - speedValue
         outputValue = self.pitchpid.calc( pitchValue )
-        
+
         err_speed = self.speedpid.error_sum()
         err_pitch = self.pitchpid.error_sum()
         rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f e: %+.8f %+.8f", pitchInput, speedInput, speedValue, outputValue, err_speed, err_pitch)
         return (outputValue, outputValue)
-    
+
     def terminate(self):
         ## do nothing
         pass
-    

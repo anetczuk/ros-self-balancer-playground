@@ -23,7 +23,7 @@
 
 
 import rospy
-    
+
 from ..cart_controller import CartController
 from .pid_object import PIDObject
 
@@ -38,15 +38,14 @@ class PIDSingleController(CartController):
     def reset_state(self):
         rospy.loginfo("resetting PID" )
         self.pitchpid.reset_state()
-        
+
     def steer(self, cart):
         pitch = cart.pitch
         pitchValue = self.pitchpid.calc( pitch )
-        
+
         rospy.loginfo("pid: %+.8f -> %+.8f", pitch, pitchValue)
         return (pitchValue, pitchValue)
-    
+
     def terminate(self):
         ## do nothing
         pass
-    

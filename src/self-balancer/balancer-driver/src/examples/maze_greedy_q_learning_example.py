@@ -20,7 +20,7 @@ class MazeGreedyQLearning(GreedyQLearning):
         http://d.hatena.ne.jp/Kshi_Kshi/20111227/1324993576
 
     '''
-    
+
     # Map of maze.
     __map_arr = None
     # Start point.
@@ -71,7 +71,7 @@ class MazeGreedyQLearning(GreedyQLearning):
                 arr_value = self.__map_arr[y][x]
                 if arr_value == self.__wall_label:
                     continue
-                    
+
                 self.save_r_df((x, y), float(arr_value))
 
     def extract_possible_actions(self, state_key):
@@ -96,11 +96,11 @@ class MazeGreedyQLearning(GreedyQLearning):
     def observe_reward_value(self, state_key, action_key):
         '''
         Compute the reward value.
-        
+
         Args:
             state_key:              The key of state.
             action_key:             The key of action.
-        
+
         Returns:
             Reward value.
 
@@ -140,7 +140,7 @@ class MazeGreedyQLearning(GreedyQLearning):
     def check_the_end_flag(self, state_key):
         '''
         Check the end flag.
-        
+
         If this return value is `True`, the learning is end.
 
         Args:
@@ -161,11 +161,11 @@ class MazeGreedyQLearning(GreedyQLearning):
     def normalize_q_value(self):
         '''
         Normalize q-value.
-        
+
         Override.
-        
+
         This method is called in each learning steps.
-        
+
         For example:
             self.q_df.q_value = self.q_df.q_value / self.q_df.q_value.sum()
         '''
@@ -191,10 +191,10 @@ class MazeGreedyQLearning(GreedyQLearning):
     def inference(self, limit=1000):
         '''
         Inference route.
-        
+
         Args:
             limit:    the number of inferencing.
-        
+
         Returns:
             [(x_1, y_1), (x_2, y_2), ...]
         '''
@@ -280,7 +280,7 @@ if __name__ == "__main__":
         agent_label=agent_label
     )
     maze_q_learning.learn(state_key=(1, 1), limit=limit)
-    
+
     q_df = maze_q_learning.q_df
     q_df = q_df.sort_values(by=["q_value"], ascending=False)
     print(q_df.head())

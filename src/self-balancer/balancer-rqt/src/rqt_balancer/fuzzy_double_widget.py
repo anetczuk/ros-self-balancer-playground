@@ -18,7 +18,7 @@ class FuzzyDoubleWidget(QWidget):
         loadUi(ui_file, self)
         self.pitchPidWidget = FuzzyWidget( self.pitchWidget, "double_fuzzy/pitch" )
         self.speedPidWidget = FuzzyWidget( self.speedWidget, "double_fuzzy/speed" )
-    
+
     def save_settings(self, plugin_settings):
         self.pitchPidWidget.save_settings(plugin_settings)
         self.speedPidWidget.save_settings(plugin_settings)
@@ -26,4 +26,3 @@ class FuzzyDoubleWidget(QWidget):
     def restore_settings(self, plugin_settings):
         self.pitchPidWidget.restore_settings(plugin_settings)
         self.speedPidWidget.restore_settings(plugin_settings)
-    

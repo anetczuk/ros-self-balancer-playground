@@ -35,17 +35,17 @@ import numpy as np
 # Plot the result in pretty 3D with alpha blending
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # Required for 3D plotting
-    
+
 from balancer.driver.fuzzy_controller import FuzzyObject
 
 
 if __name__ == '__main__':
     fuzzy = FuzzyObject()
-    
+
     fuzzy.ant_pitch.view()
     fuzzy.ant_speed.view()
     fuzzy.con_voltage.view()
-     
+
 #     rule1.view()
     fuzzy.con_voltage.view(sim=fuzzy.sim)
 
@@ -55,30 +55,29 @@ if __name__ == '__main__':
     upsampledy = np.linspace(-30, 30, 21)
     x, y = np.meshgrid(upsampledx, upsampledy)
     z = np.zeros_like(x)
-    
+
     # Loop through the system 21*21 times to collect the control surface
     for i in range(21):
         for j in range(21):
             out = fuzzy.compute(x[i, j], y[i, j])
             z[i, j] = out
-    
+
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111, projection='3d')
-     
+
     surf = ax.plot_surface(x, y, z, rstride=1, cstride=1, cmap='viridis',
                            linewidth=0.4, antialiased=True)
-     
+
     cset = ax.contourf(x, y, z, zdir='z', offset=-2.5, cmap='viridis', alpha=0.5)
     cset = ax.contourf(x, y, z, zdir='x', offset=3, cmap='viridis', alpha=0.5)
     cset = ax.contourf(x, y, z, zdir='y', offset=3, cmap='viridis', alpha=0.5)
-     
+
     ax.set_xlabel("pitch")
     ax.set_ylabel("speed")
     ax.set_zlabel("voltage")
-     
+
     ax.view_init(30, 200)
-    
+
     plt.show()
 
 #     input("Press Enter to continue...")
-    
