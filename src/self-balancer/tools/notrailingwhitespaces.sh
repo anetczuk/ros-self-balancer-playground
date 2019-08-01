@@ -5,5 +5,7 @@
 SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 
 
+src_dir=$SCRIPT_DIR/..
 
-find $SCRIPT_DIR -name "*.py" | xargs sed -i 's/[ \t]*$//'
+
+find $src_dir -name "*.py" | xargs sed -i 's/[ \t]*$//'
