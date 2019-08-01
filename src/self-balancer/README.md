@@ -1,4 +1,8 @@
-# Two Wheel Balancer
+# Two Wheeled Balancer
+
+Project contains two modules:
+- *balancer-driver* containing exmaples of control algorithms
+- *balancer-rqt* containig example of GUI made for *rqt*
 
 
 ## Running application
@@ -9,13 +13,13 @@ To run application try one of:
 - execute *cd balancer-driver/src; python3 -m balancer*
 
 
-### Running tests
+## Running tests
 
 To run tests execute *balancer-driver/src/runtests.py*. It can be run with code profiling 
 and code coverage options.
 
 
-### rqt plugin options:
+## *rqt* options:
 
 To run *balancer* plugin for *rqt* execute one of following commands:
 - ```rqt -vvv --standalone rqt_balancer```
@@ -32,7 +36,7 @@ Packages list:
 ```rospack list```
 
 
-## Required libraries
+# Required libraries
 
 - *numpy-quaternion*
 - *matplotlib*
