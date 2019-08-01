@@ -7,7 +7,7 @@ This is environment for self-balancing robot. It consists of simulation model an
 
 - use of Robot Operating System (ROS)
 - integration with Gazebo
-- use of ```rqt_plot``` (*src/self-balancer/balancer-driver/plot*.sh*)
+- use of ```rqt_plot``` (*src/self-balancer/balancer-driver/plot\*.sh*)
 - how to interact with ROS using Python (publishers and subscribers) -- *src/self-balancer/balancer-driver*
 - how to prepare GUI for ```rqt``` using *Qt* and Python  -- *src/self-balancer/balancer-rqt*
 
@@ -26,7 +26,7 @@ Start every command inside virtual environment, each in new command line:
 2. launch TeeterBot simulation by *src/teeterbot/run_empty.sh*
 3. start *self-balancer* driver by *src/self-balancer/balancer-driver/src/drive*
 4. (optional) start *self-balancer* control GUI by ```rqt```
-5. (optional) run one of plotters *src/self-balancer/balancer-driver/plot${html`*`}.sh* to observer inputs and outputs
+5. (optional) run one of plotters *src/self-balancer/balancer-driver/plot\*.sh* to observer inputs and outputs
 
 
 ## Packages
