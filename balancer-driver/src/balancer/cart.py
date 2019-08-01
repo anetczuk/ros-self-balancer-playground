@@ -33,6 +33,23 @@ from std_msgs.msg import String
 from sensor_msgs.msg import Imu
 from std_srvs.srv import Empty
 
+try:
+    import matplotlib
+
+    # Make sure that we are using QT5
+    matplotlib.use('Qt5Agg')
+    from PyQt5.QtWidgets import qApp
+    
+    import matplotlib.pyplot as plt
+    ##print("all backends:", plt.rcsetup.all_backends )
+    ##print("current backend:", plt.get_backend() )
+    
+except ImportError:
+    ### No module named <name>
+    #logging.exception("Exception while importing")
+    print("Exception while importing")
+    exit(1)
+
 from .driver.pid_single_controller import PIDSingleController
 from .driver.pid_cascade_controller import PIDCascadeController
 from .driver.fuzzy_controller import FuzzyController
@@ -94,7 +111,7 @@ class Cart:
         while not rospy.is_shutdown():
             ##str = "hello world %s"%rospy.get_time()
             #val = random.uniform(-1.0, 1.0)
-
+            
             pitch_pub.publish( self.pitch )
 
             output = self.drive()
@@ -109,7 +126,10 @@ class Cart:
                 left_pub.publish(0.0)
                 right_pub.publish(0.0)
                 output_pub.publish(0.0)
-                
+            
+            ## redraw plot windows
+            qApp.processEvents()
+            
             try:
                 r.sleep()
             except rospy.exceptions.ROSTimeMovedBackwardsException as e:
@@ -136,14 +156,20 @@ class Cart:
     def _create_controller(self, controller_type):
         rospy.loginfo("got controller: %s", controller_type)
         if controller_type == "PID_SINGLE":
+            if self.controller is not None:
+                self.controller.terminate()
             rospy.loginfo("setting single PID controller" )
             self.controller = PIDSingleController()
             return
         if controller_type == "PID_CASCADE":
+            if self.controller is not None:
+                self.controller.terminate()
             rospy.loginfo("setting cascade PID controller" )
             self.controller = PIDCascadeController()
             return
         if controller_type == "FUZZY_DOUBLE":
+            if self.controller is not None:
+                self.controller.terminate()
             rospy.loginfo("setting double Fuzzy controller" )
             self.controller = FuzzyController()
             return

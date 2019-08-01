@@ -46,3 +46,7 @@ class PIDSingleController(CartController):
         rospy.loginfo("pid: %+.8f -> %+.8f", pitch, pitchValue)
         return (pitchValue, pitchValue)
     
+    def terminate(self):
+        ## do nothing
+        pass
+    

@@ -21,15 +21,19 @@
 # SOFTWARE.
 #
 
+import time
 import rospy
 from std_msgs.msg import Float64
 
 import numpy as np
 from skfuzzy import control as ctrl
-from enum import Enum, EnumMeta, unique
+from skfuzzy.control.visualization import FuzzyVariableVisualizer, ControlSystemVisualizer
+from enum import Enum, unique
+# from enum import EnumMeta
+import matplotlib.pyplot
 
 from ..synchronized import synchronized
-from apt_offline_core.AptOfflineMagicLib import NONE
+# from apt_offline_core.AptOfflineMagicLib import NONE
 
 
 class Error():
@@ -48,6 +52,94 @@ class Error():
         return self.value
 
 
+class PlotsDict():
+    
+    def __init__(self):
+        self._variable_plots = {}
+        self.request_list = []
+
+    def request_plot(self, fuzzyObj, window_title):
+        self.request_list.append( (fuzzyObj, window_title) )
+    
+    def process_requests(self):
+        if len(self.request_list) < 1:
+            return
+        for fuzz, title in self.request_list:
+            self.plot( fuzz, title )
+        self.request_list.clear()
+    
+    def plot(self, fuzzyObj, window_title):
+        if fuzzyObj is None:
+            return
+        if window_title is None:
+            return
+        
+        vizualizer = self._create_visualizer( window_title, fuzzyObj )
+        fig = vizualizer.fig
+        
+        #self.close( window_title )
+        #fig = self._plot_fuzzy(fuzzyObj)       
+        
+        if fig is None:
+            return
+        fig.canvas.set_window_title( window_title )
+        self._variable_plots[ window_title ] = vizualizer
+    
+    def close(self, figKey):
+        if figKey is None:
+            return
+        vizualizer = self._variable_plots.get( figKey, None )
+        if vizualizer is None:
+            return
+        fig = vizualizer.fig
+        matplotlib.pyplot.close(fig)
+        
+    def close_all(self):
+        for items in self._variable_plots.items():
+            self.close(items[0])
+
+    def _plot_fuzzy(self, fuzzyObj):
+        if isinstance(fuzzyObj, ctrl.fuzzyvariable.FuzzyVariable):
+            fig, ax = FuzzyVariableVisualizer(fuzzyObj).view()
+            fig.show()
+            return fig
+        if isinstance(fuzzyObj, ctrl.ControlSystem):
+            fig, ax = ControlSystemVisualizer(fuzzyObj).view()
+            fig.show()
+            return fig
+        return None
+
+    def _create_visualizer(self, window_title, fuzzyObj):
+        visualiser = self._variable_plots.get( window_title, None )
+#             visualiser.fuzzy_var = fuzzyObj
+#             fig, ax = visualiser.view()
+#             fig.show()
+#             return visualiser
+        if isinstance(fuzzyObj, ctrl.fuzzyvariable.FuzzyVariable):
+            if visualiser is None:
+                visualiser = FuzzyVariableVisualizer(fuzzyObj)
+                visualiser.view()
+                visualiser.fig.show()
+            else:
+                visualiser.ax.clear()
+                visualiser.fuzzy_var = fuzzyObj
+                visualiser.view()
+                visualiser.fig.canvas.draw_idle()
+            return visualiser
+        if isinstance(fuzzyObj, ctrl.ControlSystem):
+            if visualiser is None:
+                visualiser = ControlSystemVisualizer(fuzzyObj)
+                visualiser.view()
+                visualiser.fig.show()
+            else:
+                visualiser.ax.clear()
+                visualiser.ctrl = fuzzyObj
+                visualiser.view()
+                visualiser.fig.canvas.draw_idle()
+            return visualiser
+        return None
+
+
 @unique
 class FuzzyType(Enum):    
     INVALID = "INVALID"
@@ -59,18 +151,19 @@ class FuzzyType(Enum):
 class Fuzzy():
     
     def __init__(self, err_param=90, derr_param=30, output_param=20):
+        self._plots = PlotsDict()
         self.error = Error()
         self.set_err_range( err_param )
         self.set_derr_range( derr_param )
         self.set_output_range( output_param )
         self.build()
-
+    
     @synchronized
     def is_enabled(self):
         if self.type() == FuzzyType.INVALID:
             return False
         return True
-    
+
     @synchronized
     def type(self):
         if self.con_output is None:
@@ -92,67 +185,89 @@ class Fuzzy():
         fuzzy_type = self.type()
         
         if fuzzy_type == FuzzyType.INVALID:
+            rospy.loginfo("fuzzy disabled")
             self.sim = None
             return
         
         if fuzzy_type == FuzzyType.BOTH:
-            rules = []        
-            rules.append( self._create_rule("NB", "NB", "NB") )
-            rules.append( self._create_rule("NB", "NS", "NB") )
-            rules.append( self._create_rule("NB",  "Z", "NS") )
-            rules.append( self._create_rule("NB", "PS", "NS") )
-            rules.append( self._create_rule("NB", "PB",  "Z") )
+            rules = []                   
+            rules.append( self._create_rule("N", "N", "N") )
+            rules.append( self._create_rule("N", "Z", "N") )
+            rules.append( self._create_rule("N", "P", "Z") )
             
-            rules.append( self._create_rule("NS", "NB", "NB") )
-            rules.append( self._create_rule("NS", "NS", "NS") )
-            rules.append( self._create_rule("NS",  "Z", "NS") )
-            rules.append( self._create_rule("NS", "PS",  "Z") )
-            rules.append( self._create_rule("NS", "PB", "PS") )
+            rules.append( self._create_rule("Z", "N", "N") )
+            rules.append( self._create_rule("Z", "Z", "Z") )
+            rules.append( self._create_rule("Z", "P", "P") )
             
-            rules.append( self._create_rule("Z", "NB", "NS") )
-            rules.append( self._create_rule("Z", "NS", "NS") )
-            rules.append( self._create_rule("Z",  "Z",  "Z") )
-            rules.append( self._create_rule("Z", "PS", "PS") )
-            rules.append( self._create_rule("Z", "PB", "PS") )
+            rules.append( self._create_rule("P", "N", "Z") )
+            rules.append( self._create_rule("P", "Z", "P") )
+            rules.append( self._create_rule("P", "P", "P") )
             
-            rules.append( self._create_rule("PS", "NB", "NS") )
-            rules.append( self._create_rule("PS", "NS",  "Z") )
-            rules.append( self._create_rule("PS",  "Z", "PS") )
-            rules.append( self._create_rule("PS", "PS", "PS") )
-            rules.append( self._create_rule("PS", "PB", "PB") )
+#             rules.append( self._create_rule("NB", "NB", "NB") )
+#             rules.append( self._create_rule("NB", "NS", "NB") )
+#             rules.append( self._create_rule("NB",  "Z", "NS") )
+#             rules.append( self._create_rule("NB", "PS", "NS") )
+#             rules.append( self._create_rule("NB", "PB",  "Z") )
+#             
+#             rules.append( self._create_rule("NS", "NB", "NB") )
+#             rules.append( self._create_rule("NS", "NS", "NS") )
+#             rules.append( self._create_rule("NS",  "Z", "NS") )
+#             rules.append( self._create_rule("NS", "PS",  "Z") )
+#             rules.append( self._create_rule("NS", "PB", "PS") )
+#             
+#             rules.append( self._create_rule("Z", "NB", "NS") )
+#             rules.append( self._create_rule("Z", "NS", "NS") )
+#             rules.append( self._create_rule("Z",  "Z",  "Z") )
+#             rules.append( self._create_rule("Z", "PS", "PS") )
+#             rules.append( self._create_rule("Z", "PB", "PS") )
+#             
+#             rules.append( self._create_rule("PS", "NB", "NS") )
+#             rules.append( self._create_rule("PS", "NS",  "Z") )
+#             rules.append( self._create_rule("PS",  "Z", "PS") )
+#             rules.append( self._create_rule("PS", "PS", "PS") )
+#             rules.append( self._create_rule("PS", "PB", "PB") )
+#             
+#             rules.append( self._create_rule("PB", "NB",  "Z") )
+#             rules.append( self._create_rule("PB", "NS", "PS") )
+#             rules.append( self._create_rule("PB",  "Z", "PS") )
+#             rules.append( self._create_rule("PB", "PS", "PB") )
+#             rules.append( self._create_rule("PB", "PB", "PB") )
             
-            rules.append( self._create_rule("PB", "NB",  "Z") )
-            rules.append( self._create_rule("PB", "NS", "PS") )
-            rules.append( self._create_rule("PB",  "Z", "PS") )
-            rules.append( self._create_rule("PB", "PS", "PB") )
-            rules.append( self._create_rule("PB", "PB", "PB") )
-            
-            output_ctrl = ctrl.ControlSystem( rules )
-            self.sim = ctrl.ControlSystemSimulation(output_ctrl)
+            self.output_ctrl = ctrl.ControlSystem( rules )
+            self.sim = ctrl.ControlSystemSimulation(self.output_ctrl)
+#             self._plots.request_plot( self.output_ctrl, "rules" )
             return
         
         if fuzzy_type == FuzzyType.ERR:
             rules = []
-            rules.append( ctrl.Rule(self.ant_err["NB"], self.con_output["NB"]) )
-            rules.append( ctrl.Rule(self.ant_err["NS"], self.con_output["NS"]) )
-            rules.append( ctrl.Rule(self.ant_err[ "Z"], self.con_output[ "Z"]) )
-            rules.append( ctrl.Rule(self.ant_err["PS"], self.con_output["PS"]) )
-            rules.append( ctrl.Rule(self.ant_err["PB"], self.con_output["PB"]) )
+            rules.append( ctrl.Rule(self.ant_err["N"], self.con_output["N"]) )
+            rules.append( ctrl.Rule(self.ant_err["Z"], self.con_output["Z"]) )
+            rules.append( ctrl.Rule(self.ant_err["P"], self.con_output["P"]) )
+#             rules.append( ctrl.Rule(self.ant_err["NB"], self.con_output["NB"]) )
+#             rules.append( ctrl.Rule(self.ant_err["NS"], self.con_output["NS"]) )
+#             rules.append( ctrl.Rule(self.ant_err[ "Z"], self.con_output[ "Z"]) )
+#             rules.append( ctrl.Rule(self.ant_err["PS"], self.con_output["PS"]) )
+#             rules.append( ctrl.Rule(self.ant_err["PB"], self.con_output["PB"]) )
             
-            output_ctrl = ctrl.ControlSystem( rules )
-            self.sim = ctrl.ControlSystemSimulation(output_ctrl)
+            self.output_ctrl = ctrl.ControlSystem( rules )
+            self.sim = ctrl.ControlSystemSimulation(self.output_ctrl)
+#             self._plots.request_plot( self.output_ctrl, "rules" )
             return
         
         if fuzzy_type == FuzzyType.DERR:
             rules = []
-            rules.append( ctrl.Rule(self.ant_derr["NB"], self.con_output["NB"]) )
-            rules.append( ctrl.Rule(self.ant_derr["NS"], self.con_output["NS"]) )
-            rules.append( ctrl.Rule(self.ant_derr[ "Z"], self.con_output[ "Z"]) )
-            rules.append( ctrl.Rule(self.ant_derr["PS"], self.con_output["PS"]) )
-            rules.append( ctrl.Rule(self.ant_derr["PB"], self.con_output["PB"]) )
+            rules.append( ctrl.Rule(self.ant_derr["N"], self.con_output["N"]) )
+            rules.append( ctrl.Rule(self.ant_derr["Z"], self.con_output["Z"]) )
+            rules.append( ctrl.Rule(self.ant_derr["P"], self.con_output["P"]) )
+#             rules.append( ctrl.Rule(self.ant_derr["NB"], self.con_output["NB"]) )
+#             rules.append( ctrl.Rule(self.ant_derr["NS"], self.con_output["NS"]) )
+#             rules.append( ctrl.Rule(self.ant_derr[ "Z"], self.con_output[ "Z"]) )
+#             rules.append( ctrl.Rule(self.ant_derr["PS"], self.con_output["PS"]) )
+#             rules.append( ctrl.Rule(self.ant_derr["PB"], self.con_output["PB"]) )
 
-            output_ctrl = ctrl.ControlSystem( rules )
-            self.sim = ctrl.ControlSystemSimulation(output_ctrl)
+            self.output_ctrl = ctrl.ControlSystem( rules )
+            self.sim = ctrl.ControlSystemSimulation(self.output_ctrl)
+#             self._plots.request_plot( self.output_ctrl, "rules" )
             return
         
         self.sim = None
@@ -165,25 +280,29 @@ class Fuzzy():
     def set_err_range(self, value):
         absval = abs(value)
         if absval < 0.1:
-            self.con_err = None
+            self.ant_err = None
             return
         invert = False
         if value < 0.0:
             invert = True
         self.ant_err = ctrl.Antecedent(np.arange(-absval, absval, 1), 'err')
-        self.ant_err.automf(names=["NB", "NS", "Z", "PS", "PB"], invert=invert)
+        self.ant_err.automf(names=["N", "Z", "P"], invert=invert)
+        ##self.ant_err.automf(names=["NB", "NS", "Z", "PS", "PB"], invert=invert)
+        self._plots.request_plot( self.ant_err, "err" )
     
     @synchronized
     def set_derr_range(self, value):
         absval = abs(value)
         if absval < 0.1:
-            self.con_derr = None
+            self.ant_derr = None
             return
         invert = False
         if value < 0.0:
             invert = True
         self.ant_derr = ctrl.Antecedent(np.arange(-absval, absval, 1), 'derr')
-        self.ant_derr.automf(names=["NB", "NS", "Z", "PS", "PB"], invert=invert)
+        self.ant_derr.automf(names=["N", "Z", "P"], invert=invert)
+        ##self.ant_derr.automf(names=["NB", "NS", "Z", "PS", "PB"], invert=invert)
+        self._plots.request_plot( self.ant_derr, "derr" )
         
     @synchronized
     def set_output_range(self, value):
@@ -195,7 +314,9 @@ class Fuzzy():
         if value < 0.0:
             invert = True
         self.con_output = ctrl.Consequent(np.arange(-absval, absval, 1), 'output')
-        self.con_output.automf(names=["NB", "NS", "Z", "PS", "PB"], invert=invert)
+        self.con_output.automf(names=["N", "Z", "P"], invert=invert)
+        ##self.con_output.automf(names=["NB", "NS", "Z", "PS", "PB"], invert=invert)
+        self._plots.request_plot( self.con_output, "output" )
 
     @synchronized
     def compute(self, valueInput):
@@ -215,12 +336,17 @@ class Fuzzy():
         
         self.sim.compute()
         
+        self._plots.process_requests()
+        
         output = self.sim.output['output']
         return output
 
+    def close(self):
+        self._plots.close_all()
+
     def _create_rule(self, err, derr, out):
         rule = ctrl.Rule(self.ant_err[err] | self.ant_derr[derr], self.con_output[out])
-        return rule
+        return rule      
         
 
 class FuzzyObject():
@@ -237,7 +363,7 @@ class FuzzyObject():
         self.derr_pub = rospy.Publisher("/self_balancer/" + self.controller_name + "/derr", Float64, queue_size=10)
 
     def reset_state(self):
-        rospy.loginfo("resetting Fuzzy" )
+        rospy.loginfo("resetting Fuzzy")
         self.fuzzy.reset_state()
         
     def calc(self, inputValue):
@@ -248,6 +374,9 @@ class FuzzyObject():
             self.err_pub.publish( err[0] )
             self.derr_pub.publish( err[1] )
         return output
+
+    def close(self):
+        self.fuzzy.close()
 
     def _err_callback(self, value):
         rospy.loginfo("%s setting err max: %r", self.controller_name, value )

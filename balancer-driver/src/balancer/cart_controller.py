@@ -43,3 +43,8 @@ class CartController(metaclass=abc.ABCMeta):
     def steer(self, cart):
         """Calculate output for left and right wheel based on pitch."""
         raise NotImplementedError('You need to define this method in derived class!')
+    
+    @abc.abstractmethod
+    def terminate(self):
+        """Close controller before destructing it."""
+        raise NotImplementedError('You need to define this method in derived class!')

@@ -57,3 +57,7 @@ class PIDCascadeController(CartController):
         rospy.loginfo("pid: %+.8f %+.8f -> %+.8f -> %+.8f e: %+.8f %+.8f", pitchInput, speedInput, speedValue, outputValue, err_speed, err_pitch)
         return (outputValue, outputValue)
     
+    def terminate(self):
+        ## do nothing
+        pass
+    

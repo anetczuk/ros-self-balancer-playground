@@ -52,3 +52,9 @@ class FuzzyController(CartController):
         
         rospy.loginfo("fuzzy: %+.8f %+.8f -> %+.8f", pitchInput, speedInput, output)
         return (output, output)
+
+    def terminate(self):
+        ## do nothing
+        self.pitchfuzzy.close()
+        self.speedfuzzy.close()
+    

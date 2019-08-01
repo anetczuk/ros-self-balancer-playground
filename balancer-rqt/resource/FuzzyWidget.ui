@@ -50,6 +50,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="errEnabledCB">
+       <property name="text">
+        <string>Enabled</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -89,6 +99,16 @@
        </property>
        <property name="value">
         <double>30.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="derrEnabledCB">
+       <property name="text">
+        <string>Enabled</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
