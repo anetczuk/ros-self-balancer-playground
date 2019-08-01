@@ -11,13 +11,13 @@ To run application try one of:
 
 ### Running tests
 
-To run tests execute *src/runtests.py*. It can be run with code profiling 
+To run tests execute *balancer-driver/src/runtests.py*. It can be run with code profiling 
 and code coverage options.
 
 
-### rqt plugin
+### rqt plugin options:
 
-Running:
+To run *balancer* plugin for *rqt* execute one of following commands:
 - ```rqt -vvv --standalone rqt_balancer```
 - ```rosrun rqt_balancer rqt_balancer```
 - ```rqt```
@@ -25,20 +25,11 @@ Running:
 Plugins list:
 ```rqt --list-plugins```
 
-Packages list:
-```rospack list```
-
-Fix/detect:
+Fix/detect plugin:
 ```rqt --force-discover```
 
-
-## Running system
-
-- start core: ```roscore```
-- launch Gazebo with robot world ```roslaunch teeterbot_gazebo teeterbot_empty_world.launch```
-- start *balancer* driver
-- start *rqt* GUI
-- run *balancer-driver/plot*.sh* to observer inputs and outputs
+Packages list:
+```rospack list```
 
 
 ## Required libraries
