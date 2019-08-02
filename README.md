@@ -41,3 +41,12 @@ Playground consists of following packages:
 1. [self-balancer](src/self-balancer/README.md) -- varius control algorithms for the robot
 2. [TeeterBot](src/teeterbot/README.md) -- self-balancing robot simulation model. Source repository can be found here: https://github.com/robustify/teeterbot
 
+
+## Requirements
+
+Environemnt was tested with following dependencies:
+- ROS Melodic
+- Gazebo version 9.9.0
+- Python 2 (for ROS)
+- Python 3 (for self-balancer)
+- numpy version 1.17.0
