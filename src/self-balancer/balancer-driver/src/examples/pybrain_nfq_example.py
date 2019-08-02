@@ -32,6 +32,7 @@ agent = LearningAgent(module, learner)
 testagent = LearningAgent(module, None)
 experiment = EpisodicExperiment(task, agent)
 
+
 def plotPerformance(values, fig):
     plt.figure(fig.number)
     plt.clf()
@@ -39,6 +40,7 @@ def plotPerformance(values, fig):
     plt.gcf().canvas.draw()
     # Without the next line, the pyplot plot won't actually show up.
     plt.pause(0.001)
+
 
 performance = []
 

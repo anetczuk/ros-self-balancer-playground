@@ -20,8 +20,9 @@ src_dir=$SCRIPT_DIR/..
 ## E402 module level import not at top of file
 ## E501 line too long (80 > 79 characters)
 ## W391 blank line at end of file
+## W504 line break after binary operator
 ## D    all docstyle checks
-ignore_errors=E115,E126,E201,E202,E221,E241,E262,E265,E266,E402,E501,W391,D
+ignore_errors=E115,E126,E201,E202,E221,E241,E262,E265,E266,E402,E501,W391,W504,D
 
 
 pycodestyle --show-source --statistics --count --ignore=$ignore_errors $src_dir

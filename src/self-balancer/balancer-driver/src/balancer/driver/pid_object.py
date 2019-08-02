@@ -28,9 +28,7 @@ from std_msgs.msg import Float64
 
 
 class PIDClassic():
-    '''
-    Wrapper of simple_pid.PID.
-    '''
+    """Wrapper of simple_pid.PID."""
 
     def __init__(self, output_limit=None):
         self.output_limit = output_limit
@@ -48,7 +46,7 @@ class PIDClassic():
 #         newPid = PID(0.0, 0.0, 0.0, sample_time=None, proportional_on_measurement=False)
         newPid = PID(0.0, 0.0, 0.0, sample_time=None, proportional_on_measurement=False)
         if self.output_limit is not None:
-            newPid.output_limits=(-self.output_limit, self.output_limit)
+            newPid.output_limits = ( -self.output_limit, self.output_limit )
         newPid._last_input = 0.0
         if self.pid is not None:
             newPid.tunings = self.pid.tunings

@@ -49,7 +49,6 @@ if __name__ == '__main__':
 #     rule1.view()
     fuzzy.con_voltage.view(sim=fuzzy.sim)
 
-
     # We can simulate at higher resolution with full accuracy
     upsampledx = np.linspace(-90, 90, 21)
     upsampledy = np.linspace(-30, 30, 21)

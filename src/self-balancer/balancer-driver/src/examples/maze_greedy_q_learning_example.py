@@ -13,13 +13,13 @@ from asyncio.base_futures import InvalidStateError
 
 
 class MazeGreedyQLearning(GreedyQLearning):
-    '''
+    """
     ε-greedy Q-Learning to solve Maze problem.
 
     Refererence:
         http://d.hatena.ne.jp/Kshi_Kshi/20111227/1324993576
 
-    '''
+    """
 
     # Map of maze.
     __map_arr = None
@@ -40,7 +40,7 @@ class MazeGreedyQLearning(GreedyQLearning):
     __map_arr_list = []
 
     def initialize(self, map_arr, start_point_label="S", end_point_label="G", wall_label="#", agent_label="@"):
-        '''
+        """
         Initialize map of maze and setup reward value.
 
         Args:
@@ -50,7 +50,7 @@ class MazeGreedyQLearning(GreedyQLearning):
             wall_label:           Label of wall.
             agent_label:          Label of agent.
 
-        '''
+        """
         np.set_printoptions(threshold=np.inf)
 
         self.__agent_label = agent_label
@@ -75,36 +75,37 @@ class MazeGreedyQLearning(GreedyQLearning):
                 self.save_r_df((x, y), float(arr_value))
 
     def extract_possible_actions(self, state_key):
-        '''
+        """
         Concreat method.
 
         Args:
             state_key       The key of state. this value is point in map.
 
-        Returns:
+        Returns
+        -------
             [(x, y)]
-
-        '''
+        """
         x, y = state_key
         if self.__map_arr[y][x] == self.__wall_label:
             raise ValueError("It is the wall. (x, y)=(%d, %d)" % (x, y))
 
-        around_map = [(x, y-1), (x, y+1), (x-1, y), (x+1, y)]
+        around_map = [(x, y - 1), (x, y + 1), (x - 1, y), (x + 1, y)]
         possible_actoins_list = [(_x, _y) for _x, _y in around_map if self.__map_arr[_y][_x] != self.__wall_label and self.__map_arr[_y][_x] != self.__start_point_label]
         return possible_actoins_list
 
     def observe_reward_value(self, state_key, action_key):
-        '''
+        """
         Compute the reward value.
 
         Args:
             state_key:              The key of state.
             action_key:             The key of action.
 
-        Returns:
+        Returns
+        -------
             Reward value.
 
-        '''
+        """
         x, y = state_key
 
         if self.__map_arr[y][x] == self.__end_point_label:
@@ -119,9 +120,7 @@ class MazeGreedyQLearning(GreedyQLearning):
             return reward_value
 
     def visualize_learning_result(self, state_key):
-        '''
-        Visualize learning result.
-        '''
+        """Visualize learning result."""
         x, y = state_key
         map_arr = copy.deepcopy(self.__map_arr)
         goal_point_tuple = np.where(map_arr == self.__end_point_label)
@@ -138,7 +137,7 @@ class MazeGreedyQLearning(GreedyQLearning):
             print("Goal !!")
 
     def check_the_end_flag(self, state_key):
-        '''
+        """
         Check the end flag.
 
         If this return value is `True`, the learning is end.
@@ -146,9 +145,10 @@ class MazeGreedyQLearning(GreedyQLearning):
         Args:
             state_key:    The key of state in `self.t`.
 
-        Returns:
+        Returns
+        -------
             bool
-        '''
+        """
         # As a rule, the learning can not be stopped.
         x, y = state_key
         end_point_tuple = np.where(self.__map_arr == self.__end_point_label)
@@ -159,7 +159,7 @@ class MazeGreedyQLearning(GreedyQLearning):
             return False
 
     def normalize_q_value(self):
-        '''
+        """
         Normalize q-value.
 
         Override.
@@ -168,13 +168,13 @@ class MazeGreedyQLearning(GreedyQLearning):
 
         For example:
             self.q_df.q_value = self.q_df.q_value / self.q_df.q_value.sum()
-        '''
+        """
         if self.q_df is not None and self.q_df.shape[0]:
             # min-max normalization
             self.q_df.q_value = (self.q_df.q_value - self.q_df.q_value.min()) / (self.q_df.q_value.max() - self.q_df.q_value.min())
 
     def normalize_r_value(self):
-        '''
+        """
         Normalize r-value.
 
         Override.
@@ -183,21 +183,22 @@ class MazeGreedyQLearning(GreedyQLearning):
 
         For example:
             self.r_df = self.r_df.r_value / self.r_df.r_value.sum()
-        '''
+        """
         if self.r_df is not None and self.r_df.shape[0]:
             # z-score normalization.
             self.r_df.r_value = (self.r_df.r_value - self.r_df.r_value.mean()) / self.r_df.r_value.std()
 
     def inference(self, limit=1000):
-        '''
+        """
         Inference route.
 
         Args:
             limit:    the number of inferencing.
 
-        Returns:
+        Returns
+        -------
             [(x_1, y_1), (x_2, y_2), ...]
-        '''
+        """
         route_list = []
         memory_list = []
         state_key = self.__start_point_tuple

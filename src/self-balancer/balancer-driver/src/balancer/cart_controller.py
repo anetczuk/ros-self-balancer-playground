@@ -33,9 +33,10 @@ class CartController(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def reset_state(self):
-        """Reset controller state.
+        """
+        Reset controller state.
 
-           It's called when cart stands up after fall.
+        It's called when cart stands up after fall.
         """
         raise NotImplementedError('You need to define this method in derived class!')
 

@@ -16,7 +16,7 @@ print(env.observation_space.high)
 print(env.observation_space.low)
 #> array([-2.4       ,        -inf, -0.20943951,        -inf])
 
-space = spaces.Discrete(8) # Set with 8 elements {0, 1, 2, ..., 7}
+space = spaces.Discrete(8)  # Set with 8 elements {0, 1, 2, ..., 7}
 x = space.sample()
 assert space.contains(x)
 assert space.n == 8
@@ -30,6 +30,6 @@ for i_episode in range(20):
         action = env.action_space.sample()
         observation, reward, done, info = env.step(action)
         if done:
-            print("Episode finished after {} timesteps".format(t+1))
+            print("Episode finished after {} timesteps".format(t + 1))
             break
 

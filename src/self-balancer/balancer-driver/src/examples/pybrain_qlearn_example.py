@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from scipy import *
-import sys, time
+from scipy import array
+import sys
+import time
 
 from pybrain.rl.environments.mazes import Maze, MDPMazeTask
 from pybrain.rl.learners.valuebased import ActionValueTable
@@ -44,6 +45,7 @@ for i in range(1000):
     agent.learn()
     agent.reset()
 
-    pylab.pcolor(controller.params.reshape(81,4).max(1).reshape(9,9))
+    controllermax = controller.params.reshape(81, 4).max(1)
+    pylab.pcolor( controllermax.reshape(9, 9) )
     pylab.draw()
 

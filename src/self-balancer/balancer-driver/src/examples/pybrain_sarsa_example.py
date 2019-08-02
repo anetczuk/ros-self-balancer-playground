@@ -7,14 +7,14 @@ Reinforcement Learning algorithms (SARSA, Q, Q(lambda)) in a classical
 fully observable MDP maze task. The goal point is the top right free
 field. """
 
-from scipy import * #@UnusedWildImport
+from scipy import array
 import pylab
 
 from pybrain.rl.environments.mazes import Maze, MDPMazeTask
 from pybrain.rl.learners.valuebased import ActionValueTable
 from pybrain.rl.agents import LearningAgent
-from pybrain.rl.learners import Q, QLambda, SARSA #@UnusedImport
-from pybrain.rl.explorers import BoltzmannExplorer #@UnusedImport
+from pybrain.rl.learners import Q, QLambda, SARSA   #@UnusedImport
+from pybrain.rl.explorers import BoltzmannExplorer  #@UnusedImport
 from pybrain.rl.experiments import Experiment
 
 
@@ -62,5 +62,6 @@ for i in range(1000):
     agent.reset()
 
     # and draw the table
-    pylab.pcolor(table.params.reshape(81,4).max(1).reshape(9,9))
+    tabmax = table.params.reshape(81, 4).max(1)
+    pylab.pcolor( tabmax.reshape(9, 9) )
     pylab.draw()
