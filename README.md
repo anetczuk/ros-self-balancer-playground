@@ -12,6 +12,12 @@ This is environment for self-balancing robot. It consists of simulation model an
 - how to prepare GUI for ```rqt``` using *Qt* and Python  -- *src/self-balancer/balancer-rqt*
 
 
+## Screens
+
+[![Gazebo TeeterBot](doc/screens/gazebo-teeterbot-small.png "Gazebo TeeterBot")](doc/screens/gazebo-teeterbot.png)
+[![Balancer GUI](doc/screens/balancer-rqt-small.png "Balancer GUI")](doc/screens/balancer-rqt.png)
+
+
 ## How to build:
 
 1. configure catkin workspace by calling script: *initialize_workspace.sh*
