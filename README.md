@@ -46,7 +46,7 @@ Playground consists of following packages:
 
 Environemnt was tested with following dependencies:
 - ROS Melodic
-- Gazebo version 9.9.0
-- Python 2 (for ROS)
-- Python 3 (for self-balancer)
-- numpy version 1.17.0
+- Gazebo 9.9.0
+- Python 2.7.15+ (for ROS)
+- Python 3.6.8 (for *self-balancer*)
+- numpy 1.17.0
