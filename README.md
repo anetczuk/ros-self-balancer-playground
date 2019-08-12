@@ -27,7 +27,7 @@ This is environment for self-balancing robot. It consists of simulation model an
 
 ## How to run:
 
-Start every command inside virtual environment, each in new command line:
+For every command start virtual environment. Open new command lines with following programs:
 1. start core: ```roscore```
 2. launch TeeterBot simulation by *src/teeterbot/run_empty.sh*
 3. start *self-balancer* driver by *src/self-balancer/balancer-driver/src/drive*
