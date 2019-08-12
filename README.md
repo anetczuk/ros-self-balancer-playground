@@ -17,6 +17,9 @@ This is environment for self-balancing robot. It consists of simulation model an
 [![Gazebo TeeterBot](doc/screens/gazebo-teeterbot-small.png "Gazebo TeeterBot")](doc/screens/gazebo-teeterbot.png)
 [![Balancer GUI](doc/screens/balancer-rqt-small.png "Balancer GUI")](doc/screens/balancer-rqt.png)
 
+1. Gazebo view of *TeeterBot* environment
+2. *Balancer*'s GUI
+
 
 ## How to build:
 
