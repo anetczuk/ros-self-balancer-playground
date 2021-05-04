@@ -23,19 +23,20 @@ This is environment for self-balancing robot. It consists of simulation model an
 
 ## How to build:
 
-1. configure catkin workspace by calling script: *initialize_workspace.sh*
-2. start virtual environment by *startenv.sh*
-3. build packages by *make.sh*
+To prepare environment execute *initialize_workspace.sh*. It's required only for first time.
+
+To build/rebuild packages after making changes execute: *make.sh*
 
 
 ## How to run:
 
-For every command start virtual environment. Open new command lines with following programs:
+For every command listed below open new command line and start virtual environment by calling *startenv.sh*.
+To run the environment execute:
 1. start core: ```roscore```
 2. launch TeeterBot simulation by *src/teeterbot/run_empty.sh*
 3. start *self-balancer* driver by *src/self-balancer/balancer-driver/src/drive*
-4. (optional) start *self-balancer* control GUI by ```rqt```
-5. (optional) run one of plotters *src/self-balancer/balancer-driver/plot\*.sh* to observer inputs and outputs
+4. (optional) start *self-balancer* control GUI by ```rqt``` (select *Plugins->Custom->Balancer Control*)
+5. (optional) run one of plotters *src/self-balancer/balancer-driver/plot_*.sh* to observer inputs and outputs
 
 
 ## Packages

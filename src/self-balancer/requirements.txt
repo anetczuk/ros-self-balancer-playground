@@ -1,0 +1,4 @@
+rospkg
+numpy-quaternion
+simple_pid
+scikit-fuzzy
