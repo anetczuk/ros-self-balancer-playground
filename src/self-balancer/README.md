@@ -15,7 +15,7 @@ To run application try one of:
 
 ## Running tests
 
-To run tests execute *balancer-driver/src/runtests.py*. It can be run with code profiling 
+To run tests execute *balancer-driver/src/testbalancer/runtests.py*. It can be run with code profiling 
 and code coverage options.
 
 

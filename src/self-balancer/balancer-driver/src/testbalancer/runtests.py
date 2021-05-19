@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2017 Arkadiusz Netczuk <dev.arnet@gmail.com>
+# Copyright (c) 2021 Arkadiusz Netczuk <dev.arnet@gmail.com>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,17 +23,23 @@
 # SOFTWARE.
 #
 
+try:
+    ## following import success only when file is directly executed from command line
+    ## otherwise will throw exception when executing as parameter for "python -m"
+    # pylint: disable=W0611
+    import __init__
+except ImportError as error:
+    ## when import fails then it means that the script was executed indirectly
+    ## in this case __init__ is already loaded
+    pass
+
 
 import sys
 import os
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-
-## do not have to add 'src' dir to path until script is in separate directory
-# src_dir = os.path.abspath(os.path.join(script_dir, "../src"))
-# sys.path.insert(0, src_dir)
-
+import logging
 import unittest
+import re
 import argparse
 import cProfile
 import subprocess
@@ -41,19 +47,120 @@ import subprocess
 import tempfile
 
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+src_dir = os.path.abspath(os.path.join(script_dir, ".."))
+sys.path.insert(0, src_dir)
+
+
+_LOGGER = logging.getLogger(__name__)
+
+
+## ===========================================
+
+
+def create_formatter(loggerFormat=None):
+    if loggerFormat is None:
+        ## loggerFormat = '%(asctime)s,%(msecs)-3d %(levelname)-8s %(threadName)s [%(filename)s:%(lineno)d] %(message)s'
+        loggerFormat = ('%(asctime)s,%(msecs)-3d %(levelname)-8s %(threadName)s %(name)s:%(funcName)s '
+                        '[%(filename)s:%(lineno)d] %(message)s')
+    dateFormat = '%Y-%m-%d %H:%M:%S'
+    return EmptyLineFormatter( loggerFormat, dateFormat )
+    ## return logging.Formatter( loggerFormat, dateFormat )
+    
+    
+def configure_console( logLevel=None ):
+    if logLevel is None:
+        logLevel = logging.DEBUG
+
+    consoleHandler = logging.StreamHandler( stream=sys.stdout )
+
+    formatter = create_formatter()
+
+    consoleHandler.setFormatter( formatter )
+
+    logging.root.addHandler( consoleHandler )
+    logging.root.setLevel( logLevel )
+
+
+class EmptyLineFormatter(logging.Formatter):
+    """Special formatter storing empty lines without formatting."""
+
+    ## override base class method
+    def format(self, record):
+        msg = record.getMessage()
+        clearMsg = msg.replace('\n', '')
+        clearMsg = clearMsg.replace('\r', '')
+        if not clearMsg:
+            # empty
+            return msg
+        return super().format( record )
+
+
+## ===========================================
+
+
+def match_tests( pattern: str ):
+    if pattern.find("*") < 0:
+        ## regular module
+        loader = unittest.TestLoader()
+        return loader.loadTestsFromName( pattern )
+
+    ## wildcarded
+    rePattern = pattern
+    # pylint: disable=W1401
+    rePattern = rePattern.replace(".", "\.")
+    rePattern = rePattern.replace("*", ".*")
+    ## rePattern = "^" + rePattern + "$"
+    _LOGGER.info( "searching test cases with pattern: %s", rePattern )
+    loader = unittest.TestLoader()
+    testsSuite = loader.discover( script_dir )
+    return match_test_suites(testsSuite, rePattern)
+
+
+def match_test_suites( testsList, rePattern: str ):
+    retSuite = unittest.TestSuite()
+    for testObject in testsList:
+        if isinstance(testObject, unittest.TestSuite):
+            subTests = match_test_suites( testObject, rePattern )
+            retSuite.addTest( subTests )
+            continue
+        if isinstance(testObject, unittest.TestCase):
+            classobj         = testObject.__class__
+            # pylint: disable=W0212,
+            testCaseFullName = ".".join([ classobj.__module__, classobj.__name__,
+                                          testObject._testMethodName ] )
+            matched = re.search(rePattern, testCaseFullName)
+            if matched is not None:
+                ## _LOGGER.info("test case matched: %s", testCaseFullName )
+                retSuite.addTest( testObject )
+            continue
+        _LOGGER.warning("unknown type: %s", type( testObject ))
+    return retSuite
+
+
 ## ============================= main section ===================================
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Test runner')
-    parser.add_argument('-rt', '--runtest', action='store', required=False, default="", help='Module with tests, e.g. test.test_class' )
+    parser.add_argument('-la', '--logall', action='store_true', help='Log all messages' )
+    # pylint: disable=C0301
+    parser.add_argument('-rt', '--runtest', action='store', required=False, default="",
+                        help='Module with tests, e.g. module.submodule.test_file.test_class.test_method, wildcard * allowed' )
     parser.add_argument('-r', '--repeat', action='store', type=int, default=0, help='Repeat tests given number of times' )
     parser.add_argument('-ut', '--untilfailure', action="store_true", help='Run tests in loop until failure' )
+    parser.add_argument('-v', '--verbose', action="store_true", help='Verbose output' )
     parser.add_argument('-cov', '--coverage', action="store_true", help='Measure code coverage' )
     parser.add_argument('--profile', action="store_true", help='Profile the code' )
     parser.add_argument('--pfile', action='store', default=None, help='Profile the code and output data to file' )
 
     args = parser.parse_args()
+
+    if args.logall is True:
+        configure_console( logging.DEBUG )
+    else:
+        configure_console( logging.ERROR )
 
     coverageData = None
     ## start code coverage
@@ -71,10 +178,16 @@ if __name__ == '__main__':
         ##coverageData.load()
         coverageData.start()
 
-    if len(args.runtest) > 0:
-        suite = unittest.TestLoader().loadTestsFromName( args.runtest )
+    verbosity = 1
+    if args.verbose:
+        verbosity = 2
+
+    if args.runtest:
+        ## not empty
+        suite = match_tests( args.runtest )
     else:
-        suite = unittest.TestLoader().discover( script_dir )
+        testsLoader = unittest.TestLoader()
+        suite = testsLoader.discover( script_dir )
 
     testsRepeats = int(args.repeat)
 
@@ -94,19 +207,19 @@ if __name__ == '__main__':
             while True:
                 print( "Tests iteration:", counter )
                 counter += 1
-                testResult = unittest.TextTestRunner().run(suite)
+                testResult = unittest.TextTestRunner(verbosity=verbosity).run(suite)
                 if testResult.wasSuccessful() is False:
                     break
                 print( "\n" )
         elif testsRepeats > 0:
             for counter in range(1, testsRepeats + 1):
                 print( "Tests iteration:", counter )
-                testResult = unittest.TextTestRunner().run(suite)
+                testResult = unittest.TextTestRunner(verbosity=verbosity).run(suite)
                 if testResult.wasSuccessful() is False:
                     break
                 print( "\n" )
         else:
-            unittest.TextTestRunner().run(suite)
+            unittest.TextTestRunner(verbosity=verbosity).run(suite)
 
     finally:
         ## stop profiler
@@ -137,4 +250,3 @@ if __name__ == '__main__':
             coverageData.save()
             coverageData.html_report(directory=htmlcovdir)
             print( "\nCoverage HTML output:", (htmlcovdir + "/index.html") )
-
