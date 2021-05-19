@@ -63,7 +63,7 @@ class PIDClassic():
         return False
 
     def error_sum(self):
-        return self.pid._error_sum + self.pid._proportional
+        return self.pid._integral
 
     def set_params(self, kp, ki, kd):
         self.pid.tunings = (kp, ki, kd)
@@ -80,7 +80,7 @@ class PIDClassic():
         return val
 
     def state(self):
-        return "%r %r" % ( self.pid._error_sum, self.pid._proportional )
+        return str( self.pid.components )
 
 
 class PIDObject():

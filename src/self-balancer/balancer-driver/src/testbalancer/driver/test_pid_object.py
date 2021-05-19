@@ -37,6 +37,14 @@ class PIDObjectTest(unittest.TestCase):
     def tearDown(self):
         self.pid = None
 
+    def test_state_init(self):
+        currState = self.pid.state()
+        self.assertEqual( "(0.0, 0.0, 0.0)", currState )
+
+    def test_error_sum_init(self):
+        currError = self.pid.error_sum()
+        self.assertEqual( 0.0, currError )
+
     def test_setpoint_poportinal(self):
         self.pid.set_params(1.0, 0.0, 0.0)
         self.pid.set_target(1.0)
@@ -53,7 +61,6 @@ class PIDObjectTest(unittest.TestCase):
     def test_setpoint_derivative(self):
         self.pid.set_params(0.0, 0.0, 1.0)
         self.pid.set_target(1.0)
+        self.pid.set_last_time( _current_time() - 1 )      ## mimic time pass
         output = self.pid.calc( 2.0 )
-        self.assertEqual( -1.0, output )
-
-
+        self.assertAlmostEqual( -1.0, output, delta=0.0001 )

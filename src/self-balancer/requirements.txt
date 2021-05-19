@@ -1,4 +1,4 @@
 rospkg
 numpy-quaternion
-simple_pid
+simple_pid >= 1.0.1
 scikit-fuzzy
